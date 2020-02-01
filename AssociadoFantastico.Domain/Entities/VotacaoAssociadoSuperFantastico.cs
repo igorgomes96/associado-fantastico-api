@@ -3,13 +3,18 @@
     public class VotacaoAssociadoSuperFantastico : Votacao
     {
         public VotacaoAssociadoSuperFantastico() { }
-        public VotacaoAssociadoSuperFantastico(Periodo periodoPrevisto, Ciclo ciclo) : base(periodoPrevisto, ciclo)
+        public VotacaoAssociadoSuperFantastico(
+             Periodo periodoPrevisto,
+             Ciclo ciclo) : base(periodoPrevisto, ciclo, new Dimensionamento(0, 2))
         {
         }
 
-        public override void FinalizarVotacao()
+        public VotacaoAssociadoSuperFantastico(
+            Periodo periodoPrevisto,
+            Ciclo ciclo,
+            Dimensionamento dimensionamento) : base(periodoPrevisto, ciclo, dimensionamento)
         {
-            throw new System.NotImplementedException();
         }
+
     }
 }

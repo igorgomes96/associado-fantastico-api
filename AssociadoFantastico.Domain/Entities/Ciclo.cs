@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace AssociadoFantastico.Domain.Entities
 {
@@ -47,5 +48,30 @@ namespace AssociadoFantastico.Domain.Entities
         public virtual IReadOnlyCollection<Associado> Associados => new ReadOnlyCollection<Associado>(_associados);
         private readonly List<Votacao> _votacoes = new List<Votacao>();
         public virtual IReadOnlyCollection<Votacao> Votacoes => new ReadOnlyCollection<Votacao>(_votacoes);
+
+        public void AdicionarAssociado(Associado associado)
+        {
+            if (_votacoes.First().PeriodoRealizado.DataFim.HasValue)
+                throw new CustomException("Não é possível adicionar associados após o término da 1ª eleição.");
+
+            if (_associados.Contains(associado) || _associados.Exists(a => a.Usuario.Cpf == associado.Usuario.Cpf))
+                throw new CustomException("Esse associado já foi cadastrado nesse ciclo.");
+
+            _associados.Add(associado);
+        }
+
+        public Associado RemoverAssociado(Associado associado)
+        {
+            if (_votacoes.First().PeriodoRealizado.DataFim.HasValue)
+                throw new CustomException("Não é possível remover associados após o término da 1ª eleição.");
+
+            if (!_associados.Contains(associado))
+                throw new CustomException("Associado não cadastrado nesse ciclo.");
+
+            var associadoRemovido = _associados.Find(a => a.Id == associado.Id);
+            _associados.Remove(associado);
+            return associadoRemovido;
+
+        }
     }
 }

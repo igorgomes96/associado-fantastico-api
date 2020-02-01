@@ -16,9 +16,14 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
                 .IsRequired()
                 .Metadata.PrincipalToDependent.SetPropertyAccessMode(PropertyAccessMode.Field);
 
-            builder.HasOne(v => v.Associado)
+            builder.HasOne(v => v.Eleitor)
                 .WithOne()
-                .HasForeignKey<Voto>(v => v.AssociadoId)
+                .HasForeignKey<Voto>(v => v.EleitorId)
+                .IsRequired();
+
+            builder.HasOne(v => v.Candidato)
+                .WithMany()
+                .HasForeignKey(v => v.CandidatoId)
                 .IsRequired();
 
             builder.Property(v => v.Ip)

@@ -10,9 +10,6 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
         {
             builder.HasKey(e => e.Id);
 
-            builder.Property(e => e.Aplausogramas)
-                .IsRequired();
-
             builder.Property(e => e.Foto)
                 .HasMaxLength(255);
 

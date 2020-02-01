@@ -11,6 +11,9 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
         {
             builder.HasKey(a => a.Id);
 
+            builder.Property(e => e.Aplausogramas)
+                .IsRequired();
+
             builder.HasOne(a => a.Usuario)
                 .WithMany()
                 .HasForeignKey(a => a.UsuarioId)

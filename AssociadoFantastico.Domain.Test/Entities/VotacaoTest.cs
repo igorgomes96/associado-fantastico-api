@@ -1,7 +1,10 @@
 ﻿using AssociadoFantastico.Domain.Entities;
+using AssociadoFantastico.Domain.Enums;
 using AssociadoFantastico.Domain.Exceptions;
 using AssociadoFantastico.Domain.Test.Fakes;
+using AssociadoFantastico.Domain.Test.Helpers;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace AssociadoFantastico.Domain.Test.Entities
@@ -83,5 +86,250 @@ namespace AssociadoFantastico.Domain.Test.Entities
             Assert.NotNull(votacao.PeriodoRealizado.DataInicio);
             Assert.NotNull(votacao.PeriodoRealizado.DataFim);
         }
+
+        [Fact]
+        public void AdicionarElegivel_AssociadoNaoCadastrado_ThrowsCustomException()
+        {
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, new Ciclo());
+
+            var exception = Assert.Throws<CustomException>(() => votacao.AdicionarElegivel(new Associado()));
+            Assert.Equal("Associado não cadastrado nesse ciclo.", exception.Message);
+
+        }
+
+        [Fact]
+        public void AdicionarElegivel_AssociadoJaElegivel_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+            ciclo.AdicionarAssociado(associado);
+            votacao.AdicionarElegivel(associado);
+
+            var exception = Assert.Throws<CustomException>(() => votacao.AdicionarElegivel(associado));
+            Assert.Equal("Esse associado já está na lista de elegíveis para essa votação.", exception.Message);
+        }
+
+        [Fact]
+        public void AdicionarElegivel_AssociadoNaoElegivel_ElegivelAdicionado()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+            ciclo.AdicionarAssociado(associado);
+            var elegivelRetornado = votacao.AdicionarElegivel(associado);
+
+            Assert.Equal(associado, elegivelRetornado.Associado);
+            Assert.Collection(votacao.Elegiveis, elegivel => Assert.Equal(elegivelRetornado, elegivel));
+        }
+
+        [Fact]
+        public void ApurarVotos_VotacaoNaoIniciada_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+            ciclo.AdicionarAssociado(associado);
+            votacao.AdicionarElegivel(associado);
+            var exception = Assert.Throws<CustomException>(() => votacao.ApurarVotos(grupo));
+
+            Assert.Equal("Não é possível fazer a apuração dos votos antes do início da votação.", exception.Message);
+        }
+
+        [Fact]
+        public void ApurarVotos_NenhumElegivelNoGrupo_RetornaListaVazia()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+            ciclo.AdicionarAssociado(associado);
+            var elegivelRetornado = votacao.AdicionarElegivel(associado);
+            votacao.IniciarVotacao();
+            elegivelRetornado.RegistrarVoto();
+
+            Assert.Empty(votacao.ApurarVotos(new Grupo("Grupo 2")));
+        }
+
+        [Fact]
+        public void ApurarVotos_GrupoValido_RetornaApuracao()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo, new Dimensionamento(2, 1));
+
+            var grupo = new Grupo("Grupo 1");
+
+            var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado1 = new Associado(usuario1, grupo, 10);
+            ciclo.AdicionarAssociado(associado1);
+
+            var usuario2 = new Usuario("12312312311", "222", "Usuário 2", "Cargo 2", "Área 2", ciclo.Empresa);
+            var associado2 = new Associado(usuario2, grupo, 11);
+            ciclo.AdicionarAssociado(associado2);
+
+            var elegivel1 = votacao.AdicionarElegivel(associado1);
+            var elegivel2 = votacao.AdicionarElegivel(associado2);
+
+            votacao.IniciarVotacao();
+            elegivel1.RegistrarVoto();
+            elegivel1.RegistrarVoto();
+            elegivel2.RegistrarVoto();
+
+            Assert.Collection(votacao.ApurarVotos(grupo),
+                elegivel =>
+                {
+                    Assert.Equal(elegivel2, elegivel);
+                    Assert.Equal(34, elegivel.Pontuacao);
+                    Assert.Equal(EApuracao.Eleito, elegivel.Apuracao);
+                },
+                elegivel =>
+                {
+                    Assert.Equal(elegivel1, elegivel);
+                    Assert.Equal(32, elegivel.Pontuacao);
+                    Assert.Equal(EApuracao.NaoEleito, elegivel.Apuracao);
+                });
+        }
+
+        [Fact]
+        public void ApurarVotos_QtdaElegiveisMenorQueDimensionamento_RetornaApuracao()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo, new Dimensionamento(2, 1));
+
+            var grupo = new Grupo("Grupo 1");
+
+            votacao.IniciarVotacao();
+
+            for (var i = 1; i <= 4; i++)
+            {
+                var usuario = new Usuario($"1231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);
+                var associado = new Associado(usuario, grupo, 10);
+                ciclo.AdicionarAssociado(associado);
+            }
+
+            var elegivelRetornado = votacao.AdicionarElegivel(ciclo.Associados.ElementAt(2));
+
+            Assert.Collection(votacao.ApurarVotos(grupo),
+                elegivel =>
+                {
+                    Assert.Equal(elegivelRetornado, elegivel);
+                    Assert.Equal(30, elegivel.Pontuacao);
+                    Assert.Equal(EApuracao.Eleito, elegivel.Apuracao);
+                });
+        }
+
+        [Fact]
+        public void RetornarApuracao_VariosGrupos_RetornaApuracao()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo, new Dimensionamento(2, 1));
+
+            votacao.IniciarVotacao();
+
+            var grupo1 = new Grupo("Grupo 1");
+            // Aplausogramas: 3, 6, 9, 12
+            for (var i = 1; i <= 4; i++)
+            {
+                var usuario = new Usuario($"1231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);
+                var associado = new Associado(usuario, grupo1, i);
+                ciclo.AdicionarAssociado(associado);
+                votacao.AdicionarElegivel(associado);
+            }
+
+            var grupo2 = new Grupo("Grupo 2");
+            for (var i = 1; i <= 3; i++)
+            {
+                var usuario = new Usuario($"2231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);
+                var associado = new Associado(usuario, grupo2, 2);
+                ciclo.AdicionarAssociado(associado);
+                votacao.AdicionarElegivel(associado);
+            }
+
+            // Grupo 1
+            // Pontuação: 7, 7, 9, 12
+            votacao.Elegiveis.ElementAt(0).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(0).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(0).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(0).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(1).RegistrarVoto();
+
+            // Grupo 2
+            // Pontuação: 8, 6, 9
+            votacao.Elegiveis.ElementAt(4).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(4).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(6).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(6).RegistrarVoto();
+            votacao.Elegiveis.ElementAt(6).RegistrarVoto();
+
+            votacao.FinalizarVotacao();
+
+            Assert.Collection(votacao.RetornarApuracao(),
+                grupo =>
+                {
+                    Assert.Equal(grupo1, grupo.Key);
+                    Assert.Collection(grupo.Value,
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(3), elegivel);
+                            Assert.Equal(12, elegivel.Pontuacao);
+                        },
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(2), elegivel);
+                            Assert.Equal(9, elegivel.Pontuacao);
+                        },
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(1), elegivel);
+                            Assert.Equal(7, elegivel.Pontuacao);
+                        },
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(0), elegivel);
+                            Assert.Equal(7, elegivel.Pontuacao);
+                        });
+                },
+                grupo =>
+                {
+                    Assert.Equal(grupo2, grupo.Key);
+                    Assert.Collection(grupo.Value,
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(6), elegivel);
+                            Assert.Equal(9, elegivel.Pontuacao);
+                        },
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(4), elegivel);
+                            Assert.Equal(8, elegivel.Pontuacao);
+                        },
+                        elegivel =>
+                        {
+                            Assert.Equal(votacao.Elegiveis.ElementAt(5), elegivel);
+                            Assert.Equal(6, elegivel.Pontuacao);
+                        });
+                });
+
+        }
     }
+
 }

@@ -11,17 +11,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Domain", "3 - Domain", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Infra", "4 - Infra", "{E199CB58-5F8B-456F-915B-CC258EC83629}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssociadoFantastico.WebApi", "AssociadoFantastico.WebApi\AssociadoFantastico.WebApi.csproj", "{C43E240A-96CD-4D0A-81E9-3F1A4CE79303}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssociadoFantastico.WebApi", "AssociadoFantastico.WebApi\AssociadoFantastico.WebApi.csproj", "{C43E240A-96CD-4D0A-81E9-3F1A4CE79303}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssociadoFantastico.Application", "AssociadoFantastico.Application\AssociadoFantastico.Application.csproj", "{48F2166C-D5FD-4E9A-86BD-98F12BE6B3AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssociadoFantastico.Application", "AssociadoFantastico.Application\AssociadoFantastico.Application.csproj", "{48F2166C-D5FD-4E9A-86BD-98F12BE6B3AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssociadoFantastico.Domain", "AssociadoFantastico.Domain\AssociadoFantastico.Domain.csproj", "{4657A493-9ADF-483A-92DE-ADAFED0D642D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssociadoFantastico.Domain", "AssociadoFantastico.Domain\AssociadoFantastico.Domain.csproj", "{4657A493-9ADF-483A-92DE-ADAFED0D642D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.1 - Data", "4.1 - Data", "{B9F56065-CA09-4D95-A369-A2A9EF77FCD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssociadoFantastico.Infra.Data", "AssociadoFantastico.Infra.Data\AssociadoFantastico.Infra.Data.csproj", "{6F57D796-67AD-475F-BC6F-E84226F31530}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssociadoFantastico.Infra.Data", "AssociadoFantastico.Infra.Data\AssociadoFantastico.Infra.Data.csproj", "{6F57D796-67AD-475F-BC6F-E84226F31530}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssociadoFantastico.Domain.Test", "AssociadoFantastico.Domain.Test\AssociadoFantastico.Domain.Test.csproj", "{3EB46D41-9BB1-43B6-B79F-4BA2CA440815}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssociadoFantastico.Domain.Test", "AssociadoFantastico.Domain.Test\AssociadoFantastico.Domain.Test.csproj", "{3EB46D41-9BB1-43B6-B79F-4BA2CA440815}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{905E8C78-AC9E-4BBC-95EB-DEEEFDD970AC}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

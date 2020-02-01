@@ -20,6 +20,14 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
 
             builder.OwnsOne(v => v.PeriodoRealizado);
 
+            builder.OwnsOne(v => v.Dimensionamento)
+                .Property(d => d.Intervalo)
+                .IsRequired();
+
+            builder.OwnsOne(v => v.Dimensionamento)
+                .Property(d => d.Acrescimo)
+                .IsRequired();
+
             builder.HasOne(v => v.Ciclo)
                 .WithMany(c => c.Votacoes)
                 .HasForeignKey(v => v.CicloId)

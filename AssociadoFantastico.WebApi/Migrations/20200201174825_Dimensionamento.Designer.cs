@@ -3,14 +3,16 @@ using System;
 using AssociadoFantastico.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AssociadoFantastico.WebApi.Migrations
 {
     [DbContext(typeof(AssociadoFantasticoContext))]
-    partial class AssociadoFantasticoContextModelSnapshot : ModelSnapshot
+    [Migration("20200201174825_Dimensionamento")]
+    partial class Dimensionamento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,9 +182,7 @@ namespace AssociadoFantastico.WebApi.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("CandidatoId");
-
-                    b.Property<Guid>("EleitorId");
+                    b.Property<Guid>("AssociadoId");
 
                     b.Property<DateTime>("Horario");
 
@@ -193,9 +193,7 @@ namespace AssociadoFantastico.WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CandidatoId");
-
-                    b.HasIndex("EleitorId")
+                    b.HasIndex("AssociadoId")
                         .IsUnique();
 
                     b.HasIndex("VotacaoId");
@@ -330,14 +328,9 @@ namespace AssociadoFantastico.WebApi.Migrations
 
             modelBuilder.Entity("AssociadoFantastico.Domain.Entities.Voto", b =>
                 {
-                    b.HasOne("AssociadoFantastico.Domain.Entities.Elegivel", "Candidato")
-                        .WithMany()
-                        .HasForeignKey("CandidatoId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AssociadoFantastico.Domain.Entities.Associado", "Eleitor")
+                    b.HasOne("AssociadoFantastico.Domain.Entities.Associado", "Associado")
                         .WithOne()
-                        .HasForeignKey("AssociadoFantastico.Domain.Entities.Voto", "EleitorId")
+                        .HasForeignKey("AssociadoFantastico.Domain.Entities.Voto", "AssociadoId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AssociadoFantastico.Domain.Entities.Votacao", "Votacao")

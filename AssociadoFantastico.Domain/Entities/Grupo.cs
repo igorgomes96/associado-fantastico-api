@@ -17,5 +17,6 @@ namespace AssociadoFantastico.Domain.Entities
 
         private readonly List<Associado> _associados = new List<Associado>();
         public virtual IReadOnlyCollection<Associado> Associados => new ReadOnlyCollection<Associado>(_associados);
+
     }
 }

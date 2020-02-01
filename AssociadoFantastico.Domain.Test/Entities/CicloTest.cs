@@ -1,12 +1,15 @@
 ﻿using AssociadoFantastico.Domain.Entities;
 using AssociadoFantastico.Domain.Exceptions;
+using AssociadoFantastico.Domain.Test.Helpers;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace AssociadoFantastico.Domain.Test.Entities
 {
     public class CicloTest
     {
+      
         [Theory]
         [InlineData(2009, 1, null, null, null, null, "O ano deve ser maior que 2010.")]
         [InlineData(2010, 0, null, null, null, null, "O semestre deve ser 1 ou 2.")]
@@ -66,6 +69,112 @@ namespace AssociadoFantastico.Domain.Test.Entities
                     Assert.Equal(periodo2Inicio, votacao.PeriodoPrevisto.DataInicio);
                     Assert.Equal(periodo2Fim, votacao.PeriodoPrevisto.DataFim);
                 });
+        }
+
+        [Fact]
+        public void AdicionarAssociado_AssociadoIdJaCadastrado_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            var associado1 = new Associado(new Usuario(), grupo, 10);
+            ciclo.AdicionarAssociado(associado1);
+
+            var associado2 = new Associado(new Usuario(), grupo, 10) { Id = associado1.Id };
+            var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado2));
+            Assert.Equal("Esse associado já foi cadastrado nesse ciclo.", exception.Message);
+        }
+
+        [Fact]
+        public void AdicionarAssociado_AssociadoCPFJaCadastrado_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado1 = new Associado(usuario1, grupo, 10);
+            ciclo.AdicionarAssociado(associado1);
+
+            var usuario2 = new Usuario("12312312312", "222", "Usuário 2", "Cargo 2", "Área 2", ciclo.Empresa);
+            var associado2 = new Associado(usuario2, grupo, 10);
+            var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado2));
+            Assert.Equal("Esse associado já foi cadastrado nesse ciclo.", exception.Message);
+        }
+
+        [Fact]
+        public void AdicionarAssociado_EleicaoFinalizada_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            ciclo.Votacoes.First().IniciarVotacao();
+            ciclo.Votacoes.First().FinalizarVotacao();
+            var grupo = new Grupo("Grupo 1");
+            var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado1 = new Associado(usuario1, grupo, 10);
+            var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado1));
+            Assert.Equal("Não é possível adicionar associados após o término da 1ª eleição.", exception.Message);
+        }
+
+
+        [Fact]
+        public void AdicionarAssociado_ParametrosValidos_AssociadoAdicionadoALista()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado1 = new Associado(usuario1, grupo, 10);
+            Assert.Equal(0, ciclo.Associados.Count);
+            ciclo.AdicionarAssociado(associado1);
+            Assert.Collection(ciclo.Associados, associado => Assert.Equal(associado1, associado));
+        }
+
+        [Fact]
+        public void RemoverAssociado_EleicaoFinalizada_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            ciclo.Votacoes.First().IniciarVotacao();
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+
+            ciclo.AdicionarAssociado(associado);
+
+            ciclo.Votacoes.First().FinalizarVotacao();
+            var exception = Assert.Throws<CustomException>(() => ciclo.RemoverAssociado(new Associado() { Id = associado.Id }));
+            Assert.Equal("Não é possível remover associados após o término da 1ª eleição.", exception.Message);
+        }
+
+        [Fact]
+        public void RemoverAssociado_AssociadoNaoCadastrado_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+
+            ciclo.AdicionarAssociado(associado);
+
+            var exception = Assert.Throws<CustomException>(() => ciclo.RemoverAssociado(new Associado() { Id = Guid.NewGuid() }));
+            Assert.Equal("Associado não cadastrado nesse ciclo.", exception.Message);
+        }
+
+        [Fact]
+        public void RemoverAssociado_AssociadoCadastrado_AssociadoRemovido()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10);
+
+            ciclo.AdicionarAssociado(associado);
+
+            var associadoRemovido = ciclo.RemoverAssociado(new Associado() { Id = associado.Id });
+            Assert.Equal(associado, associadoRemovido);
+            Assert.Empty(ciclo.Associados);
         }
     }
 }
