@@ -77,10 +77,10 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var ciclo = Factories.CriarCicloValido();
 
             var grupo = new Grupo("Grupo 1");
-            var associado1 = new Associado(new Usuario(), grupo, 10);
+            var associado1 = new Associado(new Usuario(), grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado1);
 
-            var associado2 = new Associado(new Usuario(), grupo, 10) { Id = associado1.Id };
+            var associado2 = new Associado(new Usuario(), grupo, 10, "1234") { Id = associado1.Id };
             var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado2));
             Assert.Equal("Esse associado já foi cadastrado nesse ciclo.", exception.Message);
         }
@@ -92,11 +92,11 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado1 = new Associado(usuario1, grupo, 10);
+            var associado1 = new Associado(usuario1, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado1);
 
             var usuario2 = new Usuario("12312312312", "222", "Usuário 2", "Cargo 2", "Área 2", ciclo.Empresa);
-            var associado2 = new Associado(usuario2, grupo, 10);
+            var associado2 = new Associado(usuario2, grupo, 10, "1234");
             var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado2));
             Assert.Equal("Esse associado já foi cadastrado nesse ciclo.", exception.Message);
         }
@@ -110,7 +110,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             ciclo.Votacoes.First().FinalizarVotacao();
             var grupo = new Grupo("Grupo 1");
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado1 = new Associado(usuario1, grupo, 10);
+            var associado1 = new Associado(usuario1, grupo, 10, "1234");
             var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado1));
             Assert.Equal("Não é possível adicionar associados após o término da 1ª eleição.", exception.Message);
         }
@@ -123,7 +123,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado1 = new Associado(usuario1, grupo, 10);
+            var associado1 = new Associado(usuario1, grupo, 10, "1234");
             Assert.Equal(0, ciclo.Associados.Count);
             ciclo.AdicionarAssociado(associado1);
             Assert.Collection(ciclo.Associados, associado => Assert.Equal(associado1, associado));
@@ -137,7 +137,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             ciclo.Votacoes.First().IniciarVotacao();
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
 
             ciclo.AdicionarAssociado(associado);
 
@@ -153,7 +153,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
 
             ciclo.AdicionarAssociado(associado);
 
@@ -168,7 +168,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
 
             ciclo.AdicionarAssociado(associado);
 

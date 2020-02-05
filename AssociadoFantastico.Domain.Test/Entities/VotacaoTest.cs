@@ -37,6 +37,49 @@ namespace AssociadoFantastico.Domain.Test.Entities
         }
 
         [Fact]
+        public void AtualizarPeriodoPrevisto_VotacaoJaIniciadaDataInicioDiferente_ThrowsCustomException()
+        {
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, new Ciclo());
+            votacao.IniciarVotacao();
+            var novoPeriodo = new Periodo(new DateTime(2019, 12, 31), new DateTime(2020, 1, 2));
+            var exception = Assert.Throws<CustomException>(() => votacao.AtualizarPeriodoPrevisto(novoPeriodo));
+            Assert.Equal("Não é possível atualizar a data prevista para início após o início da votação.", exception.Message);
+        }
+
+        [Fact]
+        public void AtualizarPeriodoPrevisto_VotacaoJaFinalizada_ThrowsCustomException()
+        {
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, new Ciclo());
+            votacao.IniciarVotacao();
+            votacao.FinalizarVotacao();
+            var novoPeriodo = new Periodo(new DateTime(2019, 12, 31), new DateTime(2020, 1, 2));
+            var exception = Assert.Throws<CustomException>(() => votacao.AtualizarPeriodoPrevisto(novoPeriodo));
+            Assert.Equal("Não é possível atualizar a período previsto após o término da votação.", exception.Message);
+        }
+
+        [Fact]
+        public void AtualizarPeriodoPrevisto_DatasNaoInformadas_ThrowsCustomException()
+        {
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, new Ciclo());
+            votacao.IniciarVotacao();
+            
+            var novoPeriodo = new Periodo(new DateTime(2019, 12, 31), null);
+            var exception = Assert.Throws<CustomException>(() => votacao.AtualizarPeriodoPrevisto(novoPeriodo));
+            Assert.Equal("Para atualizar o período previsto é preciso informar a data de início de fim da votação.", exception.Message);
+            
+            novoPeriodo = new Periodo(null, new DateTime(2020, 1, 3));
+            exception = Assert.Throws<CustomException>(() => votacao.AtualizarPeriodoPrevisto(novoPeriodo));
+            Assert.Equal("Para atualizar o período previsto é preciso informar a data de início de fim da votação.", exception.Message);
+
+            novoPeriodo = new Periodo(null, null);
+            exception = Assert.Throws<CustomException>(() => votacao.AtualizarPeriodoPrevisto(novoPeriodo));
+            Assert.Equal("Para atualizar o período previsto é preciso informar a data de início de fim da votação.", exception.Message);
+        }
+
+        [Fact]
         public void IniciarVotacao_VotacaoJaIniciada_ThrowsCustomException()
         {
             var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
@@ -107,7 +150,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
             votacao.AdicionarElegivel(associado);
 
@@ -124,7 +167,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
             var elegivelRetornado = votacao.AdicionarElegivel(associado);
 
@@ -141,7 +184,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
             votacao.AdicionarElegivel(associado);
             var exception = Assert.Throws<CustomException>(() => votacao.ApurarVotos(grupo));
@@ -158,7 +201,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             var grupo = new Grupo("Grupo 1");
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado = new Associado(usuario, grupo, 10);
+            var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
             var elegivelRetornado = votacao.AdicionarElegivel(associado);
             votacao.IniciarVotacao();
@@ -177,11 +220,11 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var grupo = new Grupo("Grupo 1");
 
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
-            var associado1 = new Associado(usuario1, grupo, 10);
+            var associado1 = new Associado(usuario1, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado1);
 
             var usuario2 = new Usuario("12312312311", "222", "Usuário 2", "Cargo 2", "Área 2", ciclo.Empresa);
-            var associado2 = new Associado(usuario2, grupo, 11);
+            var associado2 = new Associado(usuario2, grupo, 11, "1234");
             ciclo.AdicionarAssociado(associado2);
 
             var elegivel1 = votacao.AdicionarElegivel(associado1);
@@ -221,7 +264,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             for (var i = 1; i <= 4; i++)
             {
                 var usuario = new Usuario($"1231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);
-                var associado = new Associado(usuario, grupo, 10);
+                var associado = new Associado(usuario, grupo, 10, "1234");
                 ciclo.AdicionarAssociado(associado);
             }
 
@@ -250,7 +293,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             for (var i = 1; i <= 4; i++)
             {
                 var usuario = new Usuario($"1231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);
-                var associado = new Associado(usuario, grupo1, i);
+                var associado = new Associado(usuario, grupo1, i, "1234");
                 ciclo.AdicionarAssociado(associado);
                 votacao.AdicionarElegivel(associado);
             }
@@ -259,7 +302,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             for (var i = 1; i <= 3; i++)
             {
                 var usuario = new Usuario($"2231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);
-                var associado = new Associado(usuario, grupo2, 2);
+                var associado = new Associado(usuario, grupo2, 2, "1234");
                 ciclo.AdicionarAssociado(associado);
                 votacao.AdicionarElegivel(associado);
             }

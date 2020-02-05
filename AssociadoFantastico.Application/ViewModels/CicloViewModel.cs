@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace AssociadoFantastico.Application.ViewModels
 {
@@ -7,7 +7,13 @@ namespace AssociadoFantastico.Application.ViewModels
         public int Ano { get; set; }
         public int Semestre { get; set; }
         public string Descricao { get; set; }
+        public DateTime DataInicio { get; set; }
+        public DateTime? DataFinalizacao { get; set; }
 
-        public IEnumerable<VotacaoViewModel> Votacoes { get; set; }
+
+        public EmpresaViewModel Empresa { get; set; }
+        public VotacaoViewModel VotacaoAssociadoFantastico { get; set; }
+        public VotacaoViewModel VotacaoAssociadoSuperFantastico { get; set; }
+
     }
 }

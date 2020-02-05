@@ -1,6 +1,8 @@
-﻿using AssociadoFantastico.Application.Implementation;
+﻿using AssociadoFantastico.Application.Configurations;
+using AssociadoFantastico.Application.Implementation;
 using AssociadoFantastico.Application.Interfaces;
 using AssociadoFantastico.Application.Repositories;
+using AssociadoFantastico.Domain.Entities;
 using AssociadoFantastico.Infra.Data.Repositories;
 using AssociadoFantastico.WebApi.Authentication;
 using AssociadoFantastico.WebApi.Authentication.Services;
@@ -35,6 +37,25 @@ namespace AssociadoFantastico.WebApi.Extensions
                 authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options => JwtBearerOptionsConfig.JwtConfiguration(options, signingConfigurations, tokenConfigurations));
+
+            services.AddAuthorization();
+
+            return services;
+        }
+
+        public static IServiceCollection AddDimensionamentosPadroes(this IServiceCollection services, IConfiguration Configuration)
+        {
+            var intervalo = Configuration.GetValue<int>("DimensionamentoPadrao:VotacaoAssociadoFantastico:Intervalo");
+            var acrescimo = Configuration.GetValue<int>("DimensionamentoPadrao:VotacaoAssociadoFantastico:Acrescimo");
+
+            var dimensionamentoAssociadoFantastico = new DimensionamentoPadraoAssociadoFantastico(intervalo, acrescimo);
+            services.AddSingleton(dimensionamentoAssociadoFantastico);
+
+            intervalo = Configuration.GetValue<int>("DimensionamentoPadrao:VotacaoAssociadoSuperFantastico:Intervalo");
+            acrescimo = Configuration.GetValue<int>("DimensionamentoPadrao:VotacaoAssociadoSuperFantastico:Acrescimo");
+
+            var dimensionamentoAssociadoSuperFantastico = new DimensionamentoPadraoAssociadoSuperFantastico(intervalo, acrescimo);
+            services.AddSingleton(dimensionamentoAssociadoSuperFantastico);
 
             return services;
         }

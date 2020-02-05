@@ -1,6 +1,7 @@
 ﻿using AssociadoFantastico.Application.ViewModels;
 using AssociadoFantastico.Domain.Entities;
 using AutoMapper;
+using System.Linq;
 
 namespace AssociadoFantastico.WebApi.AutoMapper
 {
@@ -12,7 +13,14 @@ namespace AssociadoFantastico.WebApi.AutoMapper
             {
                 cfg.CreateMap<Empresa, EmpresaViewModel>().ReverseMap()
                     .ConvertUsing(dest => new Empresa(dest.Nome));
-                cfg.CreateMap<Ciclo, CicloViewModel>();
+                cfg.CreateMap<Ciclo, CicloViewModel>()
+                    .ForMember(
+                        dest => dest.VotacaoAssociadoFantastico,
+                        src => src.MapFrom(ciclo => ciclo.Votacoes.Single(v => v is VotacaoAssociadoFantastico))
+                    ).ForMember(
+                        dest => dest.VotacaoAssociadoSuperFantastico,
+                        src => src.MapFrom(ciclo => ciclo.Votacoes.Single(v => v is VotacaoAssociadoSuperFantastico))
+                    );
                 cfg.CreateMap<Periodo, PeriodoViewModel>().ReverseMap();
                 cfg.CreateMap<Usuario, UsuarioViewModel>();
                 cfg.CreateMap<Associado, AssociadoViewModel>()
@@ -35,7 +43,6 @@ namespace AssociadoFantastico.WebApi.AutoMapper
                         src.Associado.GrupoId));
                 cfg.CreateMap<Grupo, GrupoViewModel>().ReverseMap().ConstructUsing(dest => new Grupo(dest.Nome));
                 cfg.CreateMap<Votacao, VotacaoViewModel>();
-                cfg.CreateMap<Votacao, VotacaoDetalhesViewModel>();
                 cfg.CreateMap<Voto, VotoViewModel>();
             });
             return config.CreateMapper();

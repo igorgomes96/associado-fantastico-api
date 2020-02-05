@@ -14,9 +14,18 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
 
             builder.Property(c => c.Semestre).IsRequired();
 
+            builder.Property(c => c.DataInicio).IsRequired();
+
+            builder.HasOne(c => c.Empresa)
+                .WithMany()
+                .HasForeignKey(c => c.EmpresaId)
+                .IsRequired();
+
             builder.Property(c => c.Descricao)
                 .IsRequired()
                 .HasMaxLength(255);
+
+            builder.HasIndex(c => new { c.Ano, c.Semestre, c.EmpresaId }).IsUnique();
         }
     }
 }

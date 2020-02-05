@@ -16,5 +16,11 @@
         {
         }
 
+        public override void FinalizarVotacao()
+        {
+            base.FinalizarVotacao();
+            Ciclo.FinalizarCiclo();
+        }
+
     }
 }

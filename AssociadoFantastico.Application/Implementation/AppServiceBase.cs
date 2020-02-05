@@ -38,7 +38,8 @@ namespace AssociadoFantastico.Application.Implementation
         }
 
 
-        public virtual IEnumerable<TEntityDTO> BuscarTodos() => _repositoryBase.BuscarTodos().AsQueryable().ProjectTo<TEntityDTO>(_mapper.ConfigurationProvider);
+        public virtual IEnumerable<TEntityDTO> BuscarTodos() => 
+            _repositoryBase.BuscarTodos().AsQueryable().ProjectTo<TEntityDTO>(_mapper.ConfigurationProvider);
 
         public virtual TEntityDTO BuscarPeloId(Guid id)
         {
@@ -77,6 +78,28 @@ namespace AssociadoFantastico.Application.Implementation
         {
             _repositoryBase.Dispose();
             _unitOfWork.Dispose();
+        }
+
+
+        // Helpers and Guard Clauses
+        protected string ResourceName { get; set; }
+        protected char ResourceGender { get; set; }
+        protected TEntity BuscarEntidade(Guid id)
+        {
+            var entity = _repositoryBase.BuscarPeloId(id);
+            IsNotNull(entity);
+            return entity;
+        }
+
+        protected void IsNotNull(object value)
+        {
+            IsNotNull(value, ResourceName, ResourceGender);
+        }
+
+        protected void IsNotNull(object value, string resourceName, char resourceGender)
+        {
+            if (value == null)
+                throw new NotFoundException($"{resourceName} não encontrad{resourceGender}!");
         }
     }
 }

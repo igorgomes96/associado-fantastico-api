@@ -63,7 +63,6 @@ namespace AssociadoFantastico.Infra.Data.Repositories
         public IUsuarioRepository UsuarioRepository => (IUsuarioRepository)_serviceProvider.GetService(typeof(IUsuarioRepository));
         public IEmpresaRepository EmpresaRepository => (IEmpresaRepository)_serviceProvider.GetService(typeof(IEmpresaRepository));
         public ICicloRepository CicloRepository => (ICicloRepository)_serviceProvider.GetService(typeof(ICicloRepository));
-        public IVotacaoRepository VotacaoRepository => (IVotacaoRepository)_serviceProvider.GetService(typeof(IVotacaoRepository));
 
         #endregion
 

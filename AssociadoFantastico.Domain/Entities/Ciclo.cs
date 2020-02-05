@@ -25,6 +25,7 @@ namespace AssociadoFantastico.Domain.Entities
             Descricao = descricao;
             Empresa = empresa ?? throw new CustomException("A empresa precisa ser informada para a criação de um novo ciclo.");
             EmpresaId = empresa.Id;
+            DataInicio = DateTime.Now;
 
             var votacaoAssociadoFantastico = new VotacaoAssociadoFantastico(
                 periodoVotacaoAssociadoFantastico ?? throw new CustomException("O período previsto para a votação dos associados fantásticos deve ser informado."), this);
@@ -40,8 +41,10 @@ namespace AssociadoFantastico.Domain.Entities
 
         public int Ano { get; private set; }
         public int Semestre { get; private set; }
-        public string Descricao { get; private set; }
+        public string Descricao { get; set; }
         public Guid EmpresaId { get; private set; }
+        public DateTime DataInicio { get; private set; }
+        public DateTime? DataFinalizacao { get; private set; }
 
         public virtual Empresa Empresa { get; private set; }
         private readonly List<Associado> _associados = new List<Associado>();
@@ -60,6 +63,16 @@ namespace AssociadoFantastico.Domain.Entities
             _associados.Add(associado);
         }
 
+        public Associado BuscarAssociadoPeloId(Guid id)
+        {
+            return _associados.FirstOrDefault(a => a.Id == id);
+        }
+
+        public Associado BuscarAssociadoPeloCPF(string cpf)
+        {
+            return _associados.FirstOrDefault(a => a.Usuario.Cpf == cpf);
+        }
+
         public Associado RemoverAssociado(Associado associado)
         {
             if (_votacoes.First().PeriodoRealizado.DataFim.HasValue)
@@ -71,7 +84,13 @@ namespace AssociadoFantastico.Domain.Entities
             var associadoRemovido = _associados.Find(a => a.Id == associado.Id);
             _associados.Remove(associado);
             return associadoRemovido;
+        }
 
+        public void FinalizarCiclo()
+        {
+            if (_votacoes.Any(v => !v.PeriodoRealizado.DataFim.HasValue))
+                throw new CustomException("Ainda existem votações em andamento nesse ciclo.");
+            DataFinalizacao = DateTime.Now;
         }
     }
 }

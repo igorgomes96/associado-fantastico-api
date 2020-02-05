@@ -8,7 +8,6 @@ namespace AssociadoFantastico.Application.Repositories
         IEmpresaRepository EmpresaRepository { get; }
         IGrupoRepository GrupoRepository { get; }
         IUsuarioRepository UsuarioRepository { get; }
-        IVotacaoRepository VotacaoRepository { get; }
         void Commit();
         void Rollback();
     }

@@ -8,7 +8,7 @@ namespace AssociadoFantastico.Domain.Entities
     {
         public Periodo(DateTime? dataInicio, DateTime? dataFim = null)
         {
-            if (dataInicio.HasValue && dataFim.HasValue && (dataInicio.Value > dataFim.Value))
+            if (dataInicio.HasValue && dataFim.HasValue && (dataInicio.Value >= dataFim.Value))
                 throw new CustomException("A data de início deve ser maior que a data de fim.");
 
             DataInicio = dataInicio;

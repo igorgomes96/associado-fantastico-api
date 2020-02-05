@@ -7,7 +7,7 @@ namespace AssociadoFantastico.Domain.Entities
     {
         public Associado() { } // EF
 
-        public Associado(Usuario usuario, Grupo grupo, int aplausogramas): base()
+        public Associado(Usuario usuario, Grupo grupo, int aplausogramas, string centroCusto): base()
         {
             if (aplausogramas <= 0) throw new CustomException("A quantidade de aplausogramas deve ser maior que 0.");
             Aplausogramas = aplausogramas;
@@ -15,11 +15,13 @@ namespace AssociadoFantastico.Domain.Entities
             UsuarioId = usuario.Id;
             Grupo = grupo ?? throw new CustomException("O grupo precisa ser informado.");
             GrupoId = grupo.Id;
+            CentroCusto = centroCusto;
 
             if (!grupo.Ativo) throw new CustomException("O grupo deve estar ativo para o cadastro do associado.");
         }
 
         public int Aplausogramas { get; private set; }
+        public string CentroCusto { get; private set; }
         public Guid UsuarioId { get; private set; }
         public Guid GrupoId { get; private set; }
         public Guid CicloId { get; private set; }

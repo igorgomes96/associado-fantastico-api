@@ -20,6 +20,7 @@ namespace AssociadoFantastico.Domain.Entities
 
         public int CalcularQuantidade(int qtdaAssociados)
         {
+            if (Intervalo == 0) return Acrescimo;
             return (int)Math.Round((decimal)qtdaAssociados / Intervalo, MidpointRounding.AwayFromZero) * Acrescimo;
         }
 

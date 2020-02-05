@@ -3,14 +3,16 @@ using System;
 using AssociadoFantastico.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AssociadoFantastico.WebApi.Migrations
 {
     [DbContext(typeof(AssociadoFantasticoContext))]
-    partial class AssociadoFantasticoContextModelSnapshot : ModelSnapshot
+    [Migration("20200204123234_FinalizacaoCiclo")]
+    partial class FinalizacaoCiclo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,8 +54,6 @@ namespace AssociadoFantastico.WebApi.Migrations
 
                     b.Property<DateTime?>("DataFinalizacao");
 
-                    b.Property<DateTime>("DataInicio");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(255);
@@ -65,9 +65,6 @@ namespace AssociadoFantastico.WebApi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EmpresaId");
-
-                    b.HasIndex("Ano", "Semestre", "EmpresaId")
-                        .IsUnique();
 
                     b.ToTable("Ciclos");
                 });

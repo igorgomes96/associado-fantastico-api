@@ -33,8 +33,6 @@ namespace AssociadoFantastico.WebApi
 
             services.AddAuthenticationConfiguration(Configuration);
 
-            services.AddAuthorization();
-
             services.AddAutoMapper();
 
             services.AddCors(options => options.AddPolicy("AllowAll", builder =>
@@ -60,6 +58,7 @@ namespace AssociadoFantastico.WebApi
                 app.UseHsts();
             }
 
+            app.UseAuthentication();
             app.UseCors("AllowAll");
 
             app.UseHttpErrorMiddleware();

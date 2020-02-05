@@ -37,6 +37,18 @@ namespace AssociadoFantastico.Domain.Entities
         private readonly List<Voto> _votos = new List<Voto>();
         public virtual IReadOnlyCollection<Voto> Votos => new ReadOnlyCollection<Voto>(_votos);
 
+        public void AtualizarPeriodoPrevisto(Periodo periodo)
+        {
+            if (!periodo.DataInicio.HasValue || !periodo.DataFim.HasValue)
+                throw new CustomException("Para atualizar o período previsto é preciso informar a data de início de fim da votação.");
+            if (PeriodoRealizado.DataFim.HasValue)
+                throw new CustomException("Não é possível atualizar a período previsto após o término da votação.");
+            if (PeriodoRealizado.DataInicio.HasValue && PeriodoPrevisto.DataInicio != periodo.DataInicio)
+                throw new CustomException("Não é possível atualizar a data prevista para início após o início da votação.");            
+
+            PeriodoPrevisto = periodo;
+        }
+
         public Elegivel AdicionarElegivel(Associado associado)
         {
             if (!Ciclo.Associados.Contains(associado))
@@ -50,18 +62,21 @@ namespace AssociadoFantastico.Domain.Entities
             return elegivel;
         }
 
+        public Elegivel BuscarElegivelPeloId(Guid id) =>
+            _elegiveis.FirstOrDefault(e => e.Id == id);
+
         public virtual void IniciarVotacao()
         {
             if (PeriodoRealizado.DataInicio.HasValue)
                 throw new CustomException("Essa votação já foi iniciada.");
-            PeriodoRealizado.DataInicio = DateTime.Now;
+            PeriodoRealizado = new Periodo(DateTime.Now, null);
         }
 
         public virtual void FinalizarVotacao()
         {
             ValidarPeriodoRealizadoParaVotacao();
             ApurarVotos();
-            PeriodoRealizado.DataFim = DateTime.Now;
+            PeriodoRealizado = new Periodo(PeriodoRealizado.DataInicio, DateTime.Now);
         }
 
         private void ValidarPeriodoRealizadoParaApuracao()
