@@ -51,44 +51,77 @@ namespace AssociadoFantastico.Domain.Entities
         public virtual IReadOnlyCollection<Associado> Associados => new ReadOnlyCollection<Associado>(_associados);
         private readonly List<Votacao> _votacoes = new List<Votacao>();
         public virtual IReadOnlyCollection<Votacao> Votacoes => new ReadOnlyCollection<Votacao>(_votacoes);
+        private readonly List<Grupo> _grupos = new List<Grupo>();
+        public virtual IReadOnlyCollection<Grupo> Grupos => new ReadOnlyCollection<Grupo>(_grupos);
+
+
+        private void ValidarNomeGrupo(Grupo grupo)
+        {
+            if (Grupos.Any(g => g.Nome == grupo.Nome))
+                throw new DuplicatedException("Já há um grupo com esse nome cadastrado.");
+        }
+
+        public void AdicionarGrupo(Grupo grupo)
+        {
+            ValidarNomeGrupo(grupo);
+            _grupos.Add(grupo);
+        }
+
+        public void AtualizarGrupo(Grupo grupo)
+        {
+            ValidarNomeGrupo(grupo);
+            var grupoCadastado = Grupos.FirstOrDefault(g => g.Id == grupo.Id);
+            if (grupoCadastado == null) throw new NotFoundException("Grupo não encontrado.");
+            grupoCadastado.Nome = grupo.Nome;
+        }
+
+        public Grupo RemoverGrupo(Grupo grupo)
+        {
+            var grupoRemovido = Grupos.FirstOrDefault(g => g.Equals(grupo));
+            if (grupoRemovido == null) throw new NotFoundException("Grupo não encontrado.");
+            if (grupoRemovido.Associados.Any())
+                throw new CustomException("Não é possível excluir um grupo que tenha associados vinculados a ele.");
+            
+            _grupos.Remove(grupoRemovido);
+            return grupoRemovido;
+        }
 
         public void AdicionarAssociado(Associado associado)
         {
-            if (_votacoes.First().PeriodoRealizado.DataFim.HasValue)
+            if (Votacoes.First().PeriodoRealizado.DataFim.HasValue)
                 throw new CustomException("Não é possível adicionar associados após o término da 1ª eleição.");
 
-            if (_associados.Contains(associado) || _associados.Exists(a => a.Usuario.Cpf == associado.Usuario.Cpf))
+            if (Associados.Contains(associado) || Associados.Any(a => a.Usuario.Cpf == associado.Usuario.Cpf))
                 throw new CustomException("Esse associado já foi cadastrado nesse ciclo.");
+
+            if (!Grupos.Contains(associado.Grupo))
+                throw new CustomException("Esse associado deve estar em um grupo habilitado para esse ciclo.");
 
             _associados.Add(associado);
         }
 
-        public Associado BuscarAssociadoPeloId(Guid id)
-        {
-            return _associados.FirstOrDefault(a => a.Id == id);
-        }
+        public Associado BuscarAssociadoPeloId(Guid id) =>
+            Associados.FirstOrDefault(a => a.Id == id);
 
-        public Associado BuscarAssociadoPeloCPF(string cpf)
-        {
-            return _associados.FirstOrDefault(a => a.Usuario.Cpf == cpf);
-        }
+        public Associado BuscarAssociadoPeloCPF(string cpf) =>
+            Associados.FirstOrDefault(a => a.Usuario.Cpf == cpf);
 
         public Associado RemoverAssociado(Associado associado)
         {
-            if (_votacoes.First().PeriodoRealizado.DataFim.HasValue)
+            if (Votacoes.First().PeriodoRealizado.DataFim.HasValue)
                 throw new CustomException("Não é possível remover associados após o término da 1ª eleição.");
 
-            if (!_associados.Contains(associado))
+            if (!Associados.Contains(associado))
                 throw new CustomException("Associado não cadastrado nesse ciclo.");
 
-            var associadoRemovido = _associados.Find(a => a.Id == associado.Id);
+            var associadoRemovido = Associados.Single(a => a.Id == associado.Id);
             _associados.Remove(associado);
             return associadoRemovido;
         }
 
         public void FinalizarCiclo()
         {
-            if (_votacoes.Any(v => !v.PeriodoRealizado.DataFim.HasValue))
+            if (Votacoes.Any(v => !v.PeriodoRealizado.DataFim.HasValue))
                 throw new CustomException("Ainda existem votações em andamento nesse ciclo.");
             DataFinalizacao = DateTime.Now;
         }

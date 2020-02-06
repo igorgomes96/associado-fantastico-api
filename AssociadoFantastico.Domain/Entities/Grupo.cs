@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace AssociadoFantastico.Domain.Entities
@@ -9,12 +10,12 @@ namespace AssociadoFantastico.Domain.Entities
         public Grupo(string nome): base()
         {
             Nome = nome;
-            Ativo = true;
         }
 
-        public string Nome { get; private set; }
-        public bool Ativo { get; private set; }
+        public string Nome { get; set; }
+        public Guid CicloId { get; private set; }
 
+        public virtual Ciclo Ciclo { get; private set; }        
         private readonly List<Associado> _associados = new List<Associado>();
         public virtual IReadOnlyCollection<Associado> Associados => new ReadOnlyCollection<Associado>(_associados);
 

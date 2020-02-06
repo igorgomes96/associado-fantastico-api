@@ -3,6 +3,7 @@ using AssociadoFantastico.Application.Interfaces;
 using AssociadoFantastico.Application.Repositories;
 using AssociadoFantastico.Application.ViewModels;
 using AssociadoFantastico.Domain.Entities;
+using AssociadoFantastico.Domain.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using System;

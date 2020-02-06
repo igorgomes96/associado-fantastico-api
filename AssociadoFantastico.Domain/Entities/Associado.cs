@@ -16,8 +16,6 @@ namespace AssociadoFantastico.Domain.Entities
             Grupo = grupo ?? throw new CustomException("O grupo precisa ser informado.");
             GrupoId = grupo.Id;
             CentroCusto = centroCusto;
-
-            if (!grupo.Ativo) throw new CustomException("O grupo deve estar ativo para o cadastro do associado.");
         }
 
         public int Aplausogramas { get; private set; }

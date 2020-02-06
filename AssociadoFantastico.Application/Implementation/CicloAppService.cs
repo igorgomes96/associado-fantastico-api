@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AssociadoFantastico.Application.Exceptions;
 using AssociadoFantastico.Application.Interfaces;
 using AssociadoFantastico.Application.Repositories;
 using AssociadoFantastico.Application.ViewModels;
 using AssociadoFantastico.Domain.Entities;
+using AssociadoFantastico.Domain.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 
@@ -22,9 +22,9 @@ namespace AssociadoFantastico.Application.Implementation
             var empresa = _unitOfWork.EmpresaRepository.BuscarPeloId(novoCiclo.EmpresaId);
             if (empresa == null) throw new NotFoundException("Empresa não encontrada.");
 
-            if (_repositoryBase.BuscarTodos()
-                .Any(c => c.Ano == novoCiclo.Ano && 
-                    c.Semestre == novoCiclo.Semestre && c.EmpresaId == novoCiclo.EmpresaId))
+            var cicloExistente = (_repositoryBase as ICicloRepository)
+                .BuscarPeloPeriodo(empresa.Id, novoCiclo.Ano, novoCiclo.Semestre);
+            if (cicloExistente != null)
                 throw new DuplicatedException("Já há um ciclo cadastrado para esse semestre.");
 
             var ciclo = new Ciclo(
@@ -35,12 +35,18 @@ namespace AssociadoFantastico.Application.Implementation
                 _mapper.Map<Periodo>(novoCiclo.PeriodoVotacaoAssociadoSuperFantastico),
                 empresa);
 
+            var cicloAnterior = (_repositoryBase as ICicloRepository)
+                .BuscarCicloAnterior(empresa.Id, novoCiclo.Ano, novoCiclo.Semestre);
+
+            if (cicloAnterior != null)
+                foreach (var grupo in cicloAnterior.Grupos) ciclo.AdicionarGrupo(grupo);
+
             return base.Adicionar(ciclo);
         }
 
         public override void Atualizar(Guid id, CicloViewModel obj)
         {
-            var ciclo = _repositoryBase.BuscarPeloId(id);
+            var ciclo = BuscarEntidade(id);
             ciclo.Descricao = obj.Descricao;
             base.Atualizar(ciclo);            
         }
@@ -52,7 +58,7 @@ namespace AssociadoFantastico.Application.Implementation
 
         public VotacaoViewModel BuscarVotacaoPeloId(Guid cicloId, Guid votacaoId)
         {
-            var ciclo = _repositoryBase.BuscarPeloId(cicloId);
+            var ciclo = BuscarEntidade(cicloId);
             var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
             IsNotNull(votacao, "Votação", 'a');
             return _mapper.Map<VotacaoViewModel>(votacao);
@@ -60,7 +66,7 @@ namespace AssociadoFantastico.Application.Implementation
 
         public void IniciarVotacao(Guid cicloId, Guid votacaoId)
         {
-            var ciclo = _repositoryBase.BuscarPeloId(cicloId);
+            var ciclo = BuscarEntidade(cicloId);
             var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
             IsNotNull(votacao, "Votação", 'a');
             votacao.IniciarVotacao();
@@ -69,7 +75,7 @@ namespace AssociadoFantastico.Application.Implementation
 
         public void FinalizarVotacao(Guid cicloId, Guid votacaoId)
         {
-            var ciclo = _repositoryBase.BuscarPeloId(cicloId);
+            var ciclo = BuscarEntidade(cicloId);
             var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
             IsNotNull(votacao, "Votação", 'a');
             votacao.FinalizarVotacao();
@@ -78,11 +84,39 @@ namespace AssociadoFantastico.Application.Implementation
 
         public void AtualizarVotacao(Guid cicloId, Guid votacaoId, VotacaoViewModel votacao)
         {
-            var ciclo = _repositoryBase.BuscarPeloId(cicloId);
+            var ciclo = BuscarEntidade(cicloId);
             var votacaoEncontrada = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
             IsNotNull(votacaoEncontrada, "Votação", 'a');
             votacaoEncontrada.AtualizarPeriodoPrevisto(new Periodo(votacao.PeriodoPrevisto.DataInicio, votacao.PeriodoPrevisto.DataFim));
             base.Atualizar(ciclo);
+        }
+
+        public void AdicionarGrupo(Guid cicloId, GrupoViewModel grupo)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            ciclo.AdicionarGrupo(_mapper.Map<Grupo>(grupo));
+            base.Atualizar(ciclo);
+        }
+
+        public IEnumerable<GrupoViewModel> BuscarGrupos(Guid cicloId)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            return ciclo.Grupos.AsQueryable().ProjectTo<GrupoViewModel>(_mapper.ConfigurationProvider);
+        }
+
+        public void AtualizarGrupo(Guid cicloId, GrupoViewModel grupo)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            ciclo.AtualizarGrupo(_mapper.Map<Grupo>(grupo));
+            base.Atualizar(ciclo);
+        }
+
+        public GrupoViewModel RemoverGrupo(Guid cicloId, Guid grupoId)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            var grupo = _mapper.Map<GrupoViewModel>(ciclo.RemoverGrupo(new Grupo() { Id = grupoId }));
+            base.Atualizar(ciclo);
+            return grupo;
         }
     }
 }

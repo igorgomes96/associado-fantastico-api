@@ -13,6 +13,10 @@ namespace AssociadoFantastico.Application.Interfaces
         void IniciarVotacao(Guid cicloId, Guid votacaoId);
         void FinalizarVotacao(Guid cicloId, Guid votacaoId);
         void AtualizarVotacao(Guid cicloId, Guid votacaoId, VotacaoViewModel votacao);
+        void AdicionarGrupo(Guid cicloId, GrupoViewModel grupo);
+        void AtualizarGrupo(Guid cicloId, GrupoViewModel grupo);
+        IEnumerable<GrupoViewModel> BuscarGrupos(Guid cicloId);
+        GrupoViewModel RemoverGrupo(Guid cicloId, Guid grupoId);
 
     }
 }

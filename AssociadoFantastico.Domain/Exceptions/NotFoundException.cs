@@ -1,6 +1,4 @@
-﻿using AssociadoFantastico.Domain.Exceptions;
-
-namespace AssociadoFantastico.Application.Exceptions
+﻿namespace AssociadoFantastico.Domain.Exceptions
 {
     public class NotFoundException : CustomException
     {

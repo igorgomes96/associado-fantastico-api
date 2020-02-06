@@ -13,6 +13,14 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
             builder.Property(g => g.Nome)
                 .HasMaxLength(150)
                 .IsRequired();
+
+            builder.HasOne(g => g.Ciclo)
+                .WithMany(c => c.Grupos)
+                .HasForeignKey(g => g.CicloId)
+                .IsRequired()
+                .Metadata.PrincipalToDependent.SetPropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasIndex(g => new { g.Nome, g.CicloId }).IsUnique();
         }
     }
 }

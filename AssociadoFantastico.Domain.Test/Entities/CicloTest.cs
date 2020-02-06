@@ -72,11 +72,90 @@ namespace AssociadoFantastico.Domain.Test.Entities
         }
 
         [Fact]
+        public void AdicionarGrupo_GrupoValido_GrupoAdicionado()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            ciclo.AdicionarGrupo(new Grupo("Grupo 1"));
+            Assert.Equal(1, ciclo.Grupos.Count);
+        }
+
+        [Fact]
+        public void AdicionarGrupo_GrupoComNomeDuplicado_ThrowsDuplicatedException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            ciclo.AdicionarGrupo(new Grupo("Grupo 1"));
+            var exception = Assert.Throws<DuplicatedException>(() => ciclo.AdicionarGrupo(new Grupo("Grupo 1")));
+            Assert.Equal("Já há um grupo com esse nome cadastrado.", exception.Message);
+        }
+
+        [Fact]
+        public void AtualizarGrupo_GrupoNaoEncontrado_ThrowsNotFoundException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var exception = Assert.Throws<NotFoundException>(() => ciclo.AtualizarGrupo(new Grupo("Teste")));
+            Assert.Equal("Grupo não encontrado.", exception.Message);
+        }
+
+        [Fact]
+        public void AtualizarGrupo_GrupoEncontrado_AtualizaNome()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var grupoAdicionado = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupoAdicionado);
+            var grupoAtualizado = new Grupo("Teste") { Id = grupoAdicionado.Id };
+            ciclo.AtualizarGrupo(grupoAtualizado);
+            Assert.Collection(ciclo.Grupos,
+                grupo =>
+                {
+                    Assert.Equal("Teste", grupo.Nome);
+                });
+        }
+
+        [Fact]
+        public void RemoverGrupo_GrupoNaoEncontrado_ThrowsNotFoundException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+
+            var exception = Assert.Throws<NotFoundException>(() => ciclo.RemoverGrupo(new Grupo("Teste")));
+            Assert.Equal("Grupo não encontrado.", exception.Message);
+            Assert.Equal(1, ciclo.Grupos.Count);
+        }
+
+        [Fact]
+        public void RemoverGrupo_GrupoEncontrado_GrupoRemovido()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var grupo1 = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo1);
+
+            var grupo2 = new Grupo("Grupo 2");
+            ciclo.AdicionarGrupo(grupo2);
+
+            var grupo3 = new Grupo("Grupo 3");
+            ciclo.AdicionarGrupo(grupo3);
+
+            var grupoRemovido = ciclo.RemoverGrupo(new Grupo() { Id = grupo2.Id });
+            Assert.Equal(grupo2, grupoRemovido);
+            Assert.Collection(ciclo.Grupos,
+                grupo =>
+                {
+                    Assert.Equal(grupo1, grupo);
+                },
+                grupo =>
+                {
+                    Assert.Equal(grupo3, grupo);
+                });
+        }
+
+        [Fact]
         public void AdicionarAssociado_AssociadoIdJaCadastrado_ThrowsCustomException()
         {
             var ciclo = Factories.CriarCicloValido();
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var associado1 = new Associado(new Usuario(), grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado1);
 
@@ -91,6 +170,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var ciclo = Factories.CriarCicloValido();
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado1 = new Associado(usuario1, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado1);
@@ -122,6 +202,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var ciclo = Factories.CriarCicloValido();
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado1 = new Associado(usuario1, grupo, 10, "1234");
             Assert.Equal(0, ciclo.Associados.Count);
@@ -136,6 +217,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
 
             ciclo.Votacoes.First().IniciarVotacao();
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
 
@@ -152,6 +234,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var ciclo = Factories.CriarCicloValido();
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
 
@@ -167,6 +250,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var ciclo = Factories.CriarCicloValido();
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
 

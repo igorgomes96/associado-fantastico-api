@@ -149,6 +149,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var votacao = new VotacaoFake(periodo, ciclo);
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
@@ -166,6 +167,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var votacao = new VotacaoFake(periodo, ciclo);
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
@@ -183,6 +185,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var votacao = new VotacaoFake(periodo, ciclo);
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
@@ -200,6 +203,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var votacao = new VotacaoFake(periodo, ciclo);
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
             var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado = new Associado(usuario, grupo, 10, "1234");
             ciclo.AdicionarAssociado(associado);
@@ -218,6 +222,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var votacao = new VotacaoFake(periodo, ciclo, new Dimensionamento(2, 1));
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
 
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
             var associado1 = new Associado(usuario1, grupo, 10, "1234");
@@ -258,6 +263,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             var votacao = new VotacaoFake(periodo, ciclo, new Dimensionamento(2, 1));
 
             var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
 
             votacao.IniciarVotacao();
 
@@ -289,6 +295,8 @@ namespace AssociadoFantastico.Domain.Test.Entities
             votacao.IniciarVotacao();
 
             var grupo1 = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo1);
+
             // Aplausogramas: 3, 6, 9, 12
             for (var i = 1; i <= 4; i++)
             {
@@ -299,6 +307,7 @@ namespace AssociadoFantastico.Domain.Test.Entities
             }
 
             var grupo2 = new Grupo("Grupo 2");
+            ciclo.AdicionarGrupo(grupo2);
             for (var i = 1; i <= 3; i++)
             {
                 var usuario = new Usuario($"2231231231{i}", new string(i.ToString()[0], 4), $"Usuário {i}", $"Cargo {i}", $"Área {i}", ciclo.Empresa);

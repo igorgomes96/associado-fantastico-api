@@ -99,8 +99,7 @@ namespace AssociadoFantastico.Domain.Entities
         public virtual void ApurarVotos()
         {
             ValidarPeriodoRealizadoParaApuracao();
-            var grupos = Elegiveis.Select(e => e.Associado.Grupo).Distinct();
-            foreach (var grupo in grupos)
+            foreach (var grupo in Ciclo.Grupos)
                 ApurarVotos(grupo);
         }
 

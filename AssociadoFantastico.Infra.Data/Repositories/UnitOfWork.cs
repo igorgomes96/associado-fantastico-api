@@ -59,7 +59,6 @@ namespace AssociadoFantastico.Infra.Data.Repositories
             }
         }
         #region Public Properties  
-        public IGrupoRepository GrupoRepository => (IGrupoRepository)_serviceProvider.GetService(typeof(IGrupoRepository));
         public IUsuarioRepository UsuarioRepository => (IUsuarioRepository)_serviceProvider.GetService(typeof(IUsuarioRepository));
         public IEmpresaRepository EmpresaRepository => (IEmpresaRepository)_serviceProvider.GetService(typeof(IEmpresaRepository));
         public ICicloRepository CicloRepository => (ICicloRepository)_serviceProvider.GetService(typeof(ICicloRepository));

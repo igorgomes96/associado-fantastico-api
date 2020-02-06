@@ -27,7 +27,7 @@ namespace AssociadoFantastico.WebApi.Controllers
             var ciclos = (_appService as ICicloAppService).BuscarPelaEmpresa(EmpresaId)
                 .OrderByDescending(c => c.Ano)
                 .ThenByDescending(c => c.Semestre);
-            
+
             if (status == "fechado")
                 return ciclos.Where(c => c.DataFinalizacao.HasValue);
 
@@ -38,7 +38,7 @@ namespace AssociadoFantastico.WebApi.Controllers
         public CicloViewModel Get(Guid id)
         {
             var ciclo = _appService.BuscarPeloId(id);
-            if (ciclo.Empresa.Id != EmpresaId) 
+            if (ciclo.Empresa.Id != EmpresaId)
                 throw new UnauthorizedException("Acesso não autorizado.");
             return ciclo;
         }
@@ -75,5 +75,25 @@ namespace AssociadoFantastico.WebApi.Controllers
         [HttpPut("{id}/votacoes/{votacaoId}")]
         public void PutVotacao(Guid id, Guid votacaoId, VotacaoViewModel votacao) =>
             (_appService as ICicloAppService).AtualizarVotacao(id, votacaoId, votacao);
+
+        [HttpGet("{id}/grupos")]
+        public IEnumerable<GrupoViewModel> GetGrupos(Guid id) =>
+            (_appService as ICicloAppService).BuscarGrupos(id);
+
+        [HttpPost("{id}/grupos")]
+        public void AdicionarGrupo(Guid id, GrupoViewModel grupo) =>
+            (_appService as ICicloAppService).AdicionarGrupo(id, grupo);
+
+        [HttpPut("{id}/grupos/{grupoId}")]
+        public void AtualizarGrupo(Guid id, Guid grupoId, GrupoViewModel grupo)
+        {
+            grupo.Id = grupoId;
+            (_appService as ICicloAppService).AtualizarGrupo(id, grupo);
+        }
+
+        [HttpDelete("{id}/grupos/{grupoId}")]
+        public GrupoViewModel RemoverGrupo(Guid id, Guid grupoId) => 
+            (_appService as ICicloAppService).RemoverGrupo(id, grupoId);
+
     }
 }

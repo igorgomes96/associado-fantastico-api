@@ -1,6 +1,7 @@
 ﻿using AssociadoFantastico.Application.Exceptions;
 using AssociadoFantastico.Application.Repositories;
 using AssociadoFantastico.Domain.Entities;
+using AssociadoFantastico.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
