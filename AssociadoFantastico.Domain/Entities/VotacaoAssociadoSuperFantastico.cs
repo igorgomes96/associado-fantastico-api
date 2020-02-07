@@ -1,4 +1,6 @@
-﻿namespace AssociadoFantastico.Domain.Entities
+﻿using AssociadoFantastico.Domain.Exceptions;
+
+namespace AssociadoFantastico.Domain.Entities
 {
     public class VotacaoAssociadoSuperFantastico : Votacao
     {
@@ -20,6 +22,13 @@
         {
             base.FinalizarVotacao();
             Ciclo.FinalizarCiclo();
+        }
+
+        public override Elegivel AdicionarElegivel(Associado associado)
+        {
+            if (PeriodoRealizado.DataInicio.HasValue)
+                throw new CustomException("Os elegíveis da votação de associados super fantásticos foram definidos na apuração da votação dos associados fantásticos.");
+            return base.AdicionarElegivel(associado);
         }
 
     }

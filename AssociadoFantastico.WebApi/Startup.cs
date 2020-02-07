@@ -33,6 +33,8 @@ namespace AssociadoFantastico.WebApi
 
             services.AddAuthenticationConfiguration(Configuration);
 
+            services.AddDimensionamentosPadroes(Configuration);
+        
             services.AddAutoMapper();
 
             services.AddCors(options => options.AddPolicy("AllowAll", builder =>

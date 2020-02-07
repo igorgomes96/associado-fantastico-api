@@ -14,9 +14,10 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
                 .HasMaxLength(255);
 
             builder.HasOne(e => e.Associado)
-                .WithMany()
+                .WithMany(a => a.Elegiveis)
                 .HasForeignKey(e => e.AssociadoId)
-                .IsRequired();
+                .IsRequired()
+                .Metadata.PrincipalToDependent.SetPropertyAccessMode(PropertyAccessMode.Field);
 
             builder.HasOne(e => e.Votacao)
                 .WithMany(v => v.Elegiveis)

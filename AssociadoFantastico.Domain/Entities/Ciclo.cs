@@ -15,7 +15,9 @@ namespace AssociadoFantastico.Domain.Entities
             string descricao,
             Periodo periodoVotacaoAssociadoFantastico,
             Periodo periodoVotacaoAssociadoSuperFantastico,
-            Empresa empresa) : base()
+            Empresa empresa,
+            Dimensionamento dimensionamentoAssociadoFantastico = null,
+            Dimensionamento dimensionamentoSuperAssociadoFantastico = null) : base()
         {
             if (ano < 2010) throw new CustomException("O ano deve ser maior que 2010.");
             if (semestre != 1 && semestre != 2) throw new CustomException("O semestre deve ser 1 ou 2.");
@@ -27,10 +29,22 @@ namespace AssociadoFantastico.Domain.Entities
             EmpresaId = empresa.Id;
             DataInicio = DateTime.Now;
 
-            var votacaoAssociadoFantastico = new VotacaoAssociadoFantastico(
-                periodoVotacaoAssociadoFantastico ?? throw new CustomException("O período previsto para a votação dos associados fantásticos deve ser informado."), this);
-            var votacaoAssociadoSuperFantastico = new VotacaoAssociadoSuperFantastico(
-                periodoVotacaoAssociadoSuperFantastico ?? throw new CustomException("O período previsto para a votação dos associados super fantásticos deve ser informado."), this);
+            if (periodoVotacaoAssociadoFantastico == null)
+                throw new CustomException("O período previsto para a votação dos associados fantásticos deve ser informado.");
+            if (periodoVotacaoAssociadoSuperFantastico == null)
+                throw new CustomException("O período previsto para a votação dos associados super fantásticos deve ser informado.");
+
+            VotacaoAssociadoFantastico votacaoAssociadoFantastico;
+            if (dimensionamentoAssociadoFantastico == null)
+                votacaoAssociadoFantastico = new VotacaoAssociadoFantastico(periodoVotacaoAssociadoFantastico, this);
+            else
+                votacaoAssociadoFantastico = new VotacaoAssociadoFantastico(periodoVotacaoAssociadoFantastico, this, dimensionamentoAssociadoFantastico);
+
+            VotacaoAssociadoSuperFantastico votacaoAssociadoSuperFantastico;
+            if (dimensionamentoSuperAssociadoFantastico == null)
+                votacaoAssociadoSuperFantastico = new VotacaoAssociadoSuperFantastico(periodoVotacaoAssociadoSuperFantastico, this);
+            else
+                votacaoAssociadoSuperFantastico = new VotacaoAssociadoSuperFantastico(periodoVotacaoAssociadoSuperFantastico, this, dimensionamentoSuperAssociadoFantastico);
 
             if (periodoVotacaoAssociadoFantastico.DataFim >= periodoVotacaoAssociadoSuperFantastico.DataInicio)
                 throw new CustomException("A data de início da votação do associado fantástico deve ser posterior à data de início da votação do associado super fantástico.");
@@ -75,6 +89,9 @@ namespace AssociadoFantastico.Domain.Entities
             grupoCadastado.Nome = grupo.Nome;
         }
 
+        public Grupo BuscarGrupoPeloId(Guid id) =>
+            Grupos.SingleOrDefault(g => g.Id == id);
+
         public Grupo RemoverGrupo(Grupo grupo)
         {
             var grupoRemovido = Grupos.FirstOrDefault(g => g.Equals(grupo));
@@ -100,11 +117,14 @@ namespace AssociadoFantastico.Domain.Entities
             _associados.Add(associado);
         }
 
-        public Associado BuscarAssociadoPeloId(Guid id) =>
-            Associados.FirstOrDefault(a => a.Id == id);
-
-        public Associado BuscarAssociadoPeloCPF(string cpf) =>
-            Associados.FirstOrDefault(a => a.Usuario.Cpf == cpf);
+        public void AtualizarAssociado(Associado associadoAtualizado)
+        {
+            var associado = Associados.SingleOrDefault(a => a.Equals(associadoAtualizado));
+            if (associado == null) throw new NotFoundException("Associado não cadastrado nesse ciclo.");
+            if (!Grupos.Any(g => g.Equals(associadoAtualizado.Grupo)))
+                throw new CustomException("Esse grupo não está habilitado para esse ciclo.");
+            associado.AtualizarDados(associadoAtualizado);
+        }
 
         public Associado RemoverAssociado(Associado associado)
         {
@@ -115,9 +135,20 @@ namespace AssociadoFantastico.Domain.Entities
                 throw new CustomException("Associado não cadastrado nesse ciclo.");
 
             var associadoRemovido = Associados.Single(a => a.Id == associado.Id);
+            if (associadoRemovido.Elegiveis.Any())
+                throw new CustomException("Não é possível remover um associado que seja elegível.");
+
             _associados.Remove(associado);
             return associadoRemovido;
         }
+
+
+        public Associado BuscarAssociadoPeloId(Guid id) =>
+            Associados.FirstOrDefault(a => a.Id == id);
+
+        public Associado BuscarAssociadoPeloCPF(string cpf) =>
+            Associados.FirstOrDefault(a => a.Usuario.Cpf == cpf);
+
 
         public void FinalizarCiclo()
         {

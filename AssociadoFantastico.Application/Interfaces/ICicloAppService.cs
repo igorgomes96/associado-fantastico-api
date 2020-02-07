@@ -17,6 +17,15 @@ namespace AssociadoFantastico.Application.Interfaces
         void AtualizarGrupo(Guid cicloId, GrupoViewModel grupo);
         IEnumerable<GrupoViewModel> BuscarGrupos(Guid cicloId);
         GrupoViewModel RemoverGrupo(Guid cicloId, Guid grupoId);
+        IEnumerable<AssociadoViewModel> BuscarAssociados(Guid cicloId, Guid? grupoId = null);
+        void AdicionarAssociado(Guid cicloId, AssociadoViewModel associado);
+        void AtualizarAssociado(Guid cicloId, AssociadoViewModel associado);
+        void RemoverAssociado(Guid cicloId, Guid associadoId);
+        AssociadoViewModel BuscarAssociado(Guid cicloId, Guid associadoId);
+        ElegivelViewModel AdicionarElegivel(Guid cicloId, Guid votacaoId, Guid associadoId);
+        IEnumerable<ElegivelViewModel> BuscarElegiveis(Guid cicloId, Guid votacaoId, Guid? grupoId = null);
+        IEnumerable<AssociadoViewModel> BuscarAssociadosNaoElegiveis(Guid cicloId, Guid? grupoId = null);
+        ElegivelViewModel RemoverElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId);
 
     }
 }

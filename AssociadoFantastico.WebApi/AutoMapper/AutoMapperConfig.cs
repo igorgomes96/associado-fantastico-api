@@ -28,8 +28,10 @@ namespace AssociadoFantastico.WebApi.AutoMapper
                         src.Usuario.Cpf,
                         src.Usuario.Matricula,
                         src.Usuario.Nome,
-                        src.Usuario.Cargo,
-                        src.Usuario.Area,
+                        src.Cargo,
+                        src.Area,
+                        src.CentroCusto,
+                        src.Aplausogramas,
                         src.Usuario.Perfil,
                         src.GrupoId));
                 cfg.CreateMap<Elegivel, ElegivelViewModel>()
@@ -37,12 +39,21 @@ namespace AssociadoFantastico.WebApi.AutoMapper
                         src.Associado.Usuario.Cpf,
                         src.Associado.Usuario.Matricula,
                         src.Associado.Usuario.Nome,
-                        src.Associado.Usuario.Cargo,
-                        src.Associado.Usuario.Area,
+                        src.Associado.Cargo,
+                        src.Associado.Area,
+                        src.Associado.CentroCusto,
+                        src.Associado.Aplausogramas,
                         src.Associado.Usuario.Perfil,
                         src.Associado.GrupoId));
                 cfg.CreateMap<Grupo, GrupoViewModel>().ReverseMap().ConstructUsing(dest => new Grupo(dest.Nome));
-                cfg.CreateMap<Votacao, VotacaoViewModel>();
+                cfg.CreateMap<Votacao, VotacaoViewModel>()
+                    .ForMember(
+                        dest => dest.TipoVotacao, 
+                        src => src.MapFrom(v => 
+                            v is VotacaoAssociadoFantastico 
+                            ? TipoVotacao.VotacaoAssociadoFantastico 
+                            : TipoVotacao.VotacaoAssociadoSuperFantastico)
+                        );
                 cfg.CreateMap<Voto, VotoViewModel>();
             });
             return config.CreateMapper();

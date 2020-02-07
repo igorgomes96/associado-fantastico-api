@@ -49,12 +49,15 @@ namespace AssociadoFantastico.Domain.Entities
             PeriodoPrevisto = periodo;
         }
 
-        public Elegivel AdicionarElegivel(Associado associado)
+        public virtual Elegivel AdicionarElegivel(Associado associado)
         {
+            if (PeriodoRealizado.DataFim.HasValue)
+                throw new CustomException("Não é possível adicionar elegíveis após o término da votação.");
+
             if (!Ciclo.Associados.Contains(associado))
                 throw new CustomException("Associado não cadastrado nesse ciclo.");
 
-            if (_elegiveis.Exists(e => e.Associado.Equals(associado)))
+            if (Elegiveis.Any(e => e.Associado.Equals(associado)))
                 throw new CustomException("Esse associado já está na lista de elegíveis para essa votação.");
 
             var elegivel = new Elegivel(associado, this);
@@ -62,8 +65,21 @@ namespace AssociadoFantastico.Domain.Entities
             return elegivel;
         }
 
+        public virtual Elegivel RemoverElegivel(Elegivel elegivel)
+        {
+            if (PeriodoRealizado.DataFim.HasValue)
+                throw new CustomException("Não é possível remover elegíveis após o término da votação.");
+
+            if (!Elegiveis.Contains(elegivel))
+                throw new CustomException("Elegível não cadastrado.");
+
+            var elegivelRemovido = Elegiveis.Single(e => e.Equals(elegivel));
+            _elegiveis.Remove(elegivelRemovido);
+            return elegivelRemovido;
+        }
+
         public Elegivel BuscarElegivelPeloId(Guid id) =>
-            _elegiveis.FirstOrDefault(e => e.Id == id);
+            Elegiveis.FirstOrDefault(e => e.Id == id);
 
         public virtual void IniciarVotacao()
         {
@@ -94,7 +110,7 @@ namespace AssociadoFantastico.Domain.Entities
         }
 
         private IEnumerable<Elegivel> RetornarElegiveisOrdenadosPorPontuacao() =>
-            _elegiveis.OrderByDescending(e => e.Pontuacao).ThenByDescending(e => e.Associado.Aplausogramas);
+            Elegiveis.OrderByDescending(e => e.Pontuacao).ThenByDescending(e => e.Associado.Aplausogramas);
 
         public virtual void ApurarVotos()
         {

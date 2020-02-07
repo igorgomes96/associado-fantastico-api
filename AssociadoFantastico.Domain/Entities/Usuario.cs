@@ -27,5 +27,14 @@ namespace AssociadoFantastico.Domain.Entities
         public Guid EmpresaId { get; private set; }
         
         public virtual Empresa Empresa { get; private set; }
+
+        public void AtualizarDados(Usuario usuario)
+        {
+            Cpf = usuario.Cpf;
+            Matricula = usuario.Matricula;
+            Nome = usuario.Nome;
+            Cargo = usuario.Cargo;
+            Area = usuario.Area;
+        }
     }
 }

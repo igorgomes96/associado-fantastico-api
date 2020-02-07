@@ -14,6 +14,15 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
             builder.Property(e => e.Aplausogramas)
                 .IsRequired();
 
+            builder.Property(u => u.Cargo)
+                .HasMaxLength(255);
+
+            builder.Property(u => u.Area)
+                .HasMaxLength(255);
+
+            builder.Property(u => u.CentroCusto)
+                .HasMaxLength(100);
+
             builder.HasOne(a => a.Usuario)
                 .WithMany()
                 .HasForeignKey(a => a.UsuarioId)

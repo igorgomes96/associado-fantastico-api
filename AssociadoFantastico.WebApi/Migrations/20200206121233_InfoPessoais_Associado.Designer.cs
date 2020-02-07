@@ -3,14 +3,16 @@ using System;
 using AssociadoFantastico.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AssociadoFantastico.WebApi.Migrations
 {
     [DbContext(typeof(AssociadoFantasticoContext))]
-    partial class AssociadoFantasticoContextModelSnapshot : ModelSnapshot
+    [Migration("20200206121233_InfoPessoais_Associado")]
+    partial class InfoPessoais_Associado
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,8 +32,7 @@ namespace AssociadoFantastico.WebApi.Migrations
                     b.Property<string>("Cargo")
                         .HasMaxLength(255);
 
-                    b.Property<string>("CentroCusto")
-                        .HasMaxLength(100);
+                    b.Property<string>("CentroCusto");
 
                     b.Property<Guid>("CicloId");
 
@@ -267,7 +268,7 @@ namespace AssociadoFantastico.WebApi.Migrations
             modelBuilder.Entity("AssociadoFantastico.Domain.Entities.Elegivel", b =>
                 {
                     b.HasOne("AssociadoFantastico.Domain.Entities.Associado", "Associado")
-                        .WithMany("Elegiveis")
+                        .WithMany()
                         .HasForeignKey("AssociadoId")
                         .OnDelete(DeleteBehavior.Cascade);
 

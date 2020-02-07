@@ -11,8 +11,10 @@ namespace AssociadoFantastico.Application.ViewModels
             string nome,
             string cargo,
             string area,
+            string centroCusto,
+            int aplausogramas,
             EPerfilUsuario perfil,
-            Guid grupoId) : base(cpf, matricula, nome, cargo, area, perfil, grupoId)
+            Guid grupoId) : base(cpf, matricula, nome, cargo, area, centroCusto, aplausogramas, perfil, grupoId)
         { }
 
         public EApuracao Apuracao { get; private set; }

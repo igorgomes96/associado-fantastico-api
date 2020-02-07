@@ -185,7 +185,6 @@ namespace AssociadoFantastico.Domain.Test.Entities
         public void AdicionarAssociado_EleicaoFinalizada_ThrowsCustomException()
         {
             var ciclo = Factories.CriarCicloValido();
-
             ciclo.Votacoes.First().IniciarVotacao();
             ciclo.Votacoes.First().FinalizarVotacao();
             var grupo = new Grupo("Grupo 1");
@@ -195,12 +194,21 @@ namespace AssociadoFantastico.Domain.Test.Entities
             Assert.Equal("Não é possível adicionar associados após o término da 1ª eleição.", exception.Message);
         }
 
+        [Fact]
+        public void AdicionarAssociado_GrupoNaoCadastrado_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var grupo = new Grupo("Grupo 1");
+            var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado1 = new Associado(usuario1, grupo, 10, "1234");
+            var exception = Assert.Throws<CustomException>(() => ciclo.AdicionarAssociado(associado1));
+            Assert.Equal("Esse associado deve estar em um grupo habilitado para esse ciclo.", exception.Message);
+        }
 
         [Fact]
         public void AdicionarAssociado_ParametrosValidos_AssociadoAdicionadoALista()
         {
             var ciclo = Factories.CriarCicloValido();
-
             var grupo = new Grupo("Grupo 1");
             ciclo.AdicionarGrupo(grupo);
             var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
@@ -260,5 +268,88 @@ namespace AssociadoFantastico.Domain.Test.Entities
             Assert.Equal(associado, associadoRemovido);
             Assert.Empty(ciclo.Associados);
         }
+
+        [Fact]
+        public void AtualizarAssociado_AssociadoNaoCadastrado_ThrowsNotFoundException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10, "1234");
+
+            ciclo.AdicionarAssociado(associado);
+
+            var exception = Assert.Throws<NotFoundException>(() => ciclo.AtualizarAssociado(new Associado() { Id = Guid.NewGuid() }));
+            Assert.Equal("Associado não cadastrado nesse ciclo.", exception.Message);
+        }
+
+        [Fact]
+        public void AtualizarAssociado_GrupoNaoCadastrado_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10, "1234");
+            var associadoAtualizado = new Associado(usuario, new Grupo("Teste"), 20, "4545") { Id = associado.Id };
+
+            ciclo.AdicionarAssociado(associado);
+
+            var exception = Assert.Throws<CustomException>(() => ciclo.AtualizarAssociado(associadoAtualizado));
+            Assert.Equal("Esse grupo não está habilitado para esse ciclo.", exception.Message);
+        }
+
+        [Fact]
+        public void AtualizarAssociado_ParametrosValidos_AtualizarAssociado()
+        {
+            var ciclo = Factories.CriarCicloValido();
+
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+            var usuario1 = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado1 = new Associado(usuario1, grupo, 10, "1234");
+            ciclo.AdicionarAssociado(associado1);
+
+            var usuario2 = new Usuario("12312312313", "222", "Usuário 2", "Cargo 2", "Área 2", ciclo.Empresa);
+            var associado2 = new Associado(usuario2, grupo, 15, "4321");
+            ciclo.AdicionarAssociado(associado2);
+
+            var usuario3 = new Usuario("12312312314", "333", "Usuário 3", "Cargo 3", "Área 3", ciclo.Empresa);
+            var associado3 = new Associado(usuario3, grupo, 24, "5454");
+            ciclo.AdicionarAssociado(associado3);
+
+            var novoGrupo = new Grupo("Teste");
+            ciclo.AdicionarGrupo(novoGrupo);
+            var usuarioAtualizado = new Usuario("12312312314", "333", "Usuário 3", "Cargo Alterado", "Área Alterada", ciclo.Empresa);
+            var associadoAtualizado = new Associado(usuarioAtualizado, novoGrupo, 20, "4545") { Id = associado2.Id };
+            ciclo.AtualizarAssociado(associadoAtualizado);
+
+            Assert.Collection(ciclo.Associados,
+                associado =>
+                {
+                    Assert.Equal("Cargo 1", associado.Cargo);
+                    Assert.Equal("Área 1", associado.Area);
+                    Assert.Equal(10, associado.Aplausogramas);
+                    Assert.Equal(grupo, associado.Grupo);
+                },
+                associado =>
+                {
+                    Assert.Equal("Cargo Alterado", associado.Cargo);
+                    Assert.Equal("Área Alterada", associado.Area);
+                    Assert.Equal(20, associado.Aplausogramas);
+                    Assert.Equal(novoGrupo, associado.Grupo);
+                },
+                associado =>
+                {
+                    Assert.Equal("Cargo 3", associado.Cargo);
+                    Assert.Equal("Área 3", associado.Area);
+                    Assert.Equal(24, associado.Aplausogramas);
+                    Assert.Equal(grupo, associado.Grupo);
+                });
+        }
+
     }
 }

@@ -1,5 +1,7 @@
 ﻿using AssociadoFantastico.Domain.Exceptions;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace AssociadoFantastico.Domain.Entities
 {
@@ -16,8 +18,12 @@ namespace AssociadoFantastico.Domain.Entities
             Grupo = grupo ?? throw new CustomException("O grupo precisa ser informado.");
             GrupoId = grupo.Id;
             CentroCusto = centroCusto;
+            Cargo = Usuario.Cargo;
+            Area = Usuario.Area;
         }
 
+        public string Cargo { get; private set; }
+        public string Area { get; private set; }
         public int Aplausogramas { get; private set; }
         public string CentroCusto { get; private set; }
         public Guid UsuarioId { get; private set; }
@@ -27,10 +33,16 @@ namespace AssociadoFantastico.Domain.Entities
         public virtual Usuario Usuario { get; private set; }
         public virtual Grupo Grupo { get; private set; }
         public virtual Ciclo Ciclo { get; private set; }
+        private readonly List<Elegivel> _elegiveis = new List<Elegivel>();
+        public virtual IReadOnlyCollection<Elegivel> Elegiveis => new ReadOnlyCollection<Elegivel>(_elegiveis);
 
-        public void AlterarGrupo(Grupo grupo)
+        public void AtualizarDados(Associado dadosAtualizados)
         {
-            throw new NotImplementedException();
+            Cargo = dadosAtualizados.Cargo;
+            Area = dadosAtualizados.Area;
+            Aplausogramas = dadosAtualizados.Aplausogramas;
+            Grupo = dadosAtualizados.Grupo ?? throw new CustomException("O grupo deve ser informado.");
+            GrupoId = dadosAtualizados.GrupoId;
         }
 
     }

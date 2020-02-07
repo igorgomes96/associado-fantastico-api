@@ -131,6 +131,66 @@ namespace AssociadoFantastico.Domain.Test.Entities
         }
 
         [Fact]
+        public void RemoverElegivel_ElegivelNaoCadastrado_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10, "1234");
+            ciclo.AdicionarAssociado(associado);
+            votacao.AdicionarElegivel(associado);
+
+            var exception = Assert.Throws<CustomException>(() => votacao.RemoverElegivel(new Elegivel()));
+            Assert.Equal("Elegível não cadastrado.", exception.Message);
+        }
+
+        [Fact]
+        public void RemoverElegivel_VotacaoFinalizada_ThrowsCustomException()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10, "1234");
+            ciclo.AdicionarAssociado(associado);
+            votacao.AdicionarElegivel(associado);
+
+            votacao.IniciarVotacao();
+            votacao.FinalizarVotacao();
+
+            var exception = Assert.Throws<CustomException>(() => votacao.RemoverElegivel(new Elegivel()));
+            Assert.Equal("Não é possível remover elegíveis após o término da votação.", exception.Message);
+        }
+
+
+        [Fact]
+        public void RemoverElegivel_ParametrosValidos_ElegivelRemovido()
+        {
+            var ciclo = Factories.CriarCicloValido();
+            var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));
+            var votacao = new VotacaoFake(periodo, ciclo);
+
+            var grupo = new Grupo("Grupo 1");
+            ciclo.AdicionarGrupo(grupo);
+            var usuario = new Usuario("12312312312", "111", "Usuário 1", "Cargo 1", "Área 1", ciclo.Empresa);
+            var associado = new Associado(usuario, grupo, 10, "1234");
+            ciclo.AdicionarAssociado(associado);
+            var elegivel = votacao.AdicionarElegivel(associado);
+
+            Assert.Equal(1, votacao.Elegiveis.Count);
+            var elegivelRemovido = votacao.RemoverElegivel(new Elegivel() { Id = elegivel.Id });
+            Assert.Equal(elegivel, elegivelRemovido);
+            Assert.Equal(0, votacao.Elegiveis.Count);
+        }
+
+        [Fact]
         public void AdicionarElegivel_AssociadoNaoCadastrado_ThrowsCustomException()
         {
             var periodo = new Periodo(new DateTime(2020, 1, 1), new DateTime(2020, 1, 2));

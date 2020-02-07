@@ -3,6 +3,7 @@ using AssociadoFantastico.Application.Interfaces;
 using AssociadoFantastico.Application.ViewModels;
 using AssociadoFantastico.Domain.Entities;
 using AssociadoFantastico.WebApi.Filters;
+using Cipa.WebApi.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -20,6 +21,7 @@ namespace AssociadoFantastico.WebApi.Controllers
         {
         }
 
+        #region Ciclos
         [HttpGet]
         [Pagination]
         public IEnumerable<CicloViewModel> Get(string status = "aberto")
@@ -59,7 +61,9 @@ namespace AssociadoFantastico.WebApi.Controllers
             novoCiclo.EmpresaId = EmpresaId;
             return (_appService as ICicloAppService).Adicionar(novoCiclo);
         }
+        #endregion
 
+        #region Votações
         [HttpGet("{id}/votacoes/{votacaoId}")]
         public VotacaoViewModel GetVotacao(Guid id, Guid votacaoId) =>
             (_appService as ICicloAppService).BuscarVotacaoPeloId(id, votacaoId);
@@ -75,7 +79,9 @@ namespace AssociadoFantastico.WebApi.Controllers
         [HttpPut("{id}/votacoes/{votacaoId}")]
         public void PutVotacao(Guid id, Guid votacaoId, VotacaoViewModel votacao) =>
             (_appService as ICicloAppService).AtualizarVotacao(id, votacaoId, votacao);
+        #endregion
 
+        #region Grupos
         [HttpGet("{id}/grupos")]
         public IEnumerable<GrupoViewModel> GetGrupos(Guid id) =>
             (_appService as ICicloAppService).BuscarGrupos(id);
@@ -94,6 +100,61 @@ namespace AssociadoFantastico.WebApi.Controllers
         [HttpDelete("{id}/grupos/{grupoId}")]
         public GrupoViewModel RemoverGrupo(Guid id, Guid grupoId) => 
             (_appService as ICicloAppService).RemoverGrupo(id, grupoId);
+        #endregion
 
+        #region Associados
+        [Query("Nome")]
+        [Pagination]
+        [HttpGet("{id}/associados")]
+        public IEnumerable<AssociadoViewModel> GetAssociados(Guid id, Guid? grupoId = null) =>
+            (_appService as ICicloAppService).BuscarAssociados(id, grupoId);
+
+
+        [Query("Nome")]
+        [Pagination]
+        [HttpGet("{id}/associados/naoelegiveis")]
+        public IEnumerable<AssociadoViewModel> GetAssociadosNaoElegiveis(Guid id, Guid? grupoId = null) =>
+           (_appService as ICicloAppService).BuscarAssociadosNaoElegiveis(id, grupoId);
+
+
+        [HttpGet("{id}/associados/{associadoId}")]
+        public AssociadoViewModel GetAssociado(Guid id, Guid associadoId) =>
+            (_appService as ICicloAppService).BuscarAssociado(id, associadoId);
+
+
+        [HttpPut("{id}/associados/{associadoId}")]
+        public void PutAtualizarAssociado(Guid id, Guid associadoId, AssociadoViewModel associado)
+        {
+            associado.Id = associadoId;
+            associado.EmpresaId = EmpresaId;
+            (_appService as ICicloAppService).AtualizarAssociado(id, associado);
+        }
+
+        [HttpDelete("{id}/associados/{associadoId}")]
+        public void DeleteAssociado(Guid id, Guid associadoId) =>
+            (_appService as ICicloAppService).RemoverAssociado(id, associadoId);
+
+        [HttpPost("{id}/associados")]
+        public void AdicionarAssociado(Guid id, AssociadoViewModel associado)
+        {
+            associado.EmpresaId = EmpresaId;
+            (_appService as ICicloAppService).AdicionarAssociado(id, associado);
+        }
+        #endregion
+
+        #region Elegíveis
+        [Query("Nome")]
+        [HttpGet("{id}/votacoes/{votacaoId}/elegiveis")]
+        public IEnumerable<ElegivelViewModel> GetElegiveis(Guid id, Guid votacaoId, Guid? grupoId = null) =>
+            (_appService as ICicloAppService).BuscarElegiveis(id, votacaoId, grupoId);
+
+        [HttpPost("{id}/votacoes/{votacaoId}/elegiveis")]
+        public ElegivelViewModel PostElegivel(Guid id, Guid votacaoId, Associado associado) =>
+            (_appService as ICicloAppService).AdicionarElegivel(id, votacaoId, associado.Id);
+
+        [HttpDelete("{id}/votacoes/{votacaoId}/elegiveis/{elegivelId}")]
+        public ElegivelViewModel PostElegivel(Guid id, Guid votacaoId, Guid elegivelId) =>
+            (_appService as ICicloAppService).RemoverElegivel(id, votacaoId, elegivelId);
+        #endregion
     }
 }
