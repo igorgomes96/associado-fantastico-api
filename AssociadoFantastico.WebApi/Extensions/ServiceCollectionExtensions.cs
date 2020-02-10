@@ -77,6 +77,10 @@ namespace AssociadoFantastico.WebApi.Extensions
             services.AddScoped<IUsuarioAppService, UsuarioAppService>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
+            // Importações
+            //services.AddScoped<IImportacaoAppService, UsuarioAppService>();
+            services.AddScoped<IImportacaoRepository, ImportacaoRepository>();
+
             // Login
             services.AddScoped<ILoginService, LoginService>();
 

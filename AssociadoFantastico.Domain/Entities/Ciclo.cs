@@ -92,6 +92,9 @@ namespace AssociadoFantastico.Domain.Entities
         public Grupo BuscarGrupoPeloId(Guid id) =>
             Grupos.SingleOrDefault(g => g.Id == id);
 
+        public Grupo BuscarGrupoPeloNome(string nome) =>
+            Grupos.SingleOrDefault(g => g.Nome.Trim().ToLower().Equals(nome.Trim().ToLower()));
+
         public Grupo RemoverGrupo(Grupo grupo)
         {
             var grupoRemovido = Grupos.FirstOrDefault(g => g.Equals(grupo));

@@ -21,6 +21,8 @@ namespace AssociadoFantastico.Infra.Data.Context
             modelBuilder.ApplyConfiguration(new VotacaoConfiguration());
             modelBuilder.ApplyConfiguration(new ElegivelConfiguration());
             modelBuilder.ApplyConfiguration(new VotoConfiguration());
+            modelBuilder.ApplyConfiguration(new InconsistenciaConfiguration());
+            modelBuilder.ApplyConfiguration(new ImportacaoConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -32,6 +34,9 @@ namespace AssociadoFantastico.Infra.Data.Context
         public virtual DbSet<Elegivel> Elegiveis { get; set; }
         public virtual DbSet<Votacao> Votacoes { get; set; }
         public virtual DbSet<Voto> Votos { get; set; }
+        public virtual DbSet<Importacao> Importacoes { get; set; }
+        public virtual DbSet<Inconsistencia> Inconsistencias { get; set; }
+
 
         public override int SaveChanges()
         {

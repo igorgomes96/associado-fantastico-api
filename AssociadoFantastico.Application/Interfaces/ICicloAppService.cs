@@ -2,6 +2,7 @@
 using AssociadoFantastico.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AssociadoFantastico.Application.Interfaces
 {
@@ -26,6 +27,9 @@ namespace AssociadoFantastico.Application.Interfaces
         IEnumerable<ElegivelViewModel> BuscarElegiveis(Guid cicloId, Guid votacaoId, Guid? grupoId = null);
         IEnumerable<AssociadoViewModel> BuscarAssociadosNaoElegiveis(Guid cicloId, Guid? grupoId = null);
         ElegivelViewModel RemoverElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId);
+        ElegivelViewModel AtualizarFotoElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId, byte[] foto, string fotoFileName);
+        Stream BuscarFotoElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId);
+        ImportacaoViewModel ImportarAssociados(Guid cicloId, Guid votacaoId, byte[] conteudoArquivo, string arquivo, string cpfUsuario);
 
     }
 }

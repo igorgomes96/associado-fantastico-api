@@ -23,7 +23,7 @@ namespace AssociadoFantastico.Domain.Entities
         }
 
         
-        public string Foto { get; private set; }
+        public string Foto { get; set; }
         public Guid AssociadoId { get; private set; }
         public Guid VotacaoId { get; private set; }
         public EApuracao Apuracao { get; private set; }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace AssociadoFantastico.WebApi.Controllers
@@ -79,6 +80,26 @@ namespace AssociadoFantastico.WebApi.Controllers
         [HttpPut("{id}/votacoes/{votacaoId}")]
         public void PutVotacao(Guid id, Guid votacaoId, VotacaoViewModel votacao) =>
             (_appService as ICicloAppService).AtualizarVotacao(id, votacaoId, votacao);
+
+        [HttpPost("{id}/votacoes/{votacaoId}/importarassociados"), DisableRequestSizeLimit]
+        public ActionResult<ImportacaoViewModel> ImportarAssociados(Guid id, Guid votacaoId)
+        {
+            if (Request.Form.Files == null || Request.Form.Files.Count == 0)
+                return BadRequest("Nenhum arquivo foi enviado.");
+
+            if (Request.Form.Files.Count > 1)
+                return BadRequest("Somente um arquivo pode ser enviado.");
+
+            var formFile = Request.Form.Files.First();
+            var fileName = formFile.FileName;
+            byte[] arquivo = null;
+            using (var ms = new MemoryStream())
+            {
+                formFile.CopyTo(ms);
+                arquivo = ms.ToArray();
+            }
+            return (_appService as ICicloAppService).ImportarAssociados(id, votacaoId, arquivo, fileName, CPFUsuario);
+        }
         #endregion
 
         #region Grupos
@@ -155,6 +176,32 @@ namespace AssociadoFantastico.WebApi.Controllers
         [HttpDelete("{id}/votacoes/{votacaoId}/elegiveis/{elegivelId}")]
         public ElegivelViewModel PostElegivel(Guid id, Guid votacaoId, Guid elegivelId) =>
             (_appService as ICicloAppService).RemoverElegivel(id, votacaoId, elegivelId);
+
+        [HttpPost("{id}/votacoes/{votacaoId}/elegiveis/{elegivelId}/foto"), DisableRequestSizeLimit]
+        public ActionResult<ElegivelViewModel> PostFotoElegivel(Guid id, Guid votacaoId, Guid elegivelId)
+        {
+            if (Request.Form.Files == null || Request.Form.Files.Count == 0)
+                return BadRequest("Nenhuma foto foi enviada.");
+
+            if (Request.Form.Files.Count > 1)
+                return BadRequest("Somente uma foto pode ser enviada.");
+
+            var formFile = Request.Form.Files.First();
+            var fileName = formFile.FileName;
+            byte[] foto = null;
+            using (var ms = new MemoryStream())
+            {
+                formFile.CopyTo(ms);
+                foto = ms.ToArray();
+            }
+            return (_appService as ICicloAppService).AtualizarFotoElegivel(id, votacaoId, elegivelId, foto, fileName);
+        }
+
+        [HttpGet("{id}/votacoes/{votacaoId}/elegiveis/{elegivelId}/foto")]
+        public IActionResult GetFotoElegivel(Guid id, Guid votacaoId, Guid elegivelId)
+        {
+            return new FileStreamResult((_appService as ICicloAppService).BuscarFotoElegivel(id, votacaoId, elegivelId), "image/jpeg");
+        }
         #endregion
     }
 }

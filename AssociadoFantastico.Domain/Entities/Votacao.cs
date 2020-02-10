@@ -36,6 +36,8 @@ namespace AssociadoFantastico.Domain.Entities
         public virtual IReadOnlyCollection<Elegivel> Elegiveis => new ReadOnlyCollection<Elegivel>(_elegiveis);
         private readonly List<Voto> _votos = new List<Voto>();
         public virtual IReadOnlyCollection<Voto> Votos => new ReadOnlyCollection<Voto>(_votos);
+        private readonly List<Importacao> _importacoes = new List<Importacao>();
+        public virtual IReadOnlyCollection<Importacao> Importacoes => new ReadOnlyCollection<Importacao>(_importacoes);
 
         public void AtualizarPeriodoPrevisto(Periodo periodo)
         {
@@ -134,6 +136,11 @@ namespace AssociadoFantastico.Domain.Entities
                 elegivel.RegistrarApuracao(Enums.EApuracao.NaoEleito);
 
             return elegiveis;
+        }
+
+        public void AdicionarImportacao(Importacao importacao)
+        {
+            this._importacoes.Add(importacao);
         }
 
         /// <summary>

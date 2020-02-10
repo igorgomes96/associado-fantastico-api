@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AssociadoFantastico.Application.Configurations;
+using AssociadoFantastico.Application.Helpers;
 using AssociadoFantastico.Application.Interfaces;
 using AssociadoFantastico.Application.Repositories;
 using AssociadoFantastico.Application.ViewModels;
@@ -14,6 +16,8 @@ namespace AssociadoFantastico.Application.Implementation
 {
     public class CicloAppService : AppServiceBase<Ciclo, CicloViewModel>, ICicloAppService
     {
+        private const string PATH_FOTOS = @"StaticFiles\Fotos\";
+        private const string PATH_IMPORTACOES = @"StaticFiles\Importacoes\";
         private readonly DimensionamentoPadraoAssociadoFantastico _dimensionamentoPadraoAssociadoFantastico;
         private readonly DimensionamentoPadraoAssociadoSuperFantastico _dimensionamentoPadraoAssociadoSuperFantastico;
 
@@ -138,6 +142,26 @@ namespace AssociadoFantastico.Application.Implementation
             return elegivelRemovido;
         }
 
+        public Stream BuscarFotoElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
+            IsNotNull(votacao, "Votação", 'a');
+            var elegivel = votacao.BuscarElegivelPeloId(elegivelId);
+            IsNotNull(elegivel, "Associado", 'o');
+            
+            string file;
+            if (string.IsNullOrEmpty(elegivel.Foto))
+                file = FileSystemHelpers.GetAbsolutePath($@"{PATH_FOTOS}usuario.jpg");
+            else
+                file = FileSystemHelpers.GetAbsolutePath(elegivel.Foto);
+
+            if (!File.Exists(file))
+                throw new NotFoundException("Foto não encontrada.");
+
+            return new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+        }
+
         public void AdicionarGrupo(Guid cicloId, GrupoViewModel grupo)
         {
             var ciclo = BuscarEntidade(cicloId);
@@ -260,6 +284,66 @@ namespace AssociadoFantastico.Application.Implementation
             var associado = ciclo.BuscarAssociadoPeloId(associadoId);
             IsNotNull(associado, "Associado", 'o');
             return _mapper.Map<AssociadoViewModel>(associado);
+        }
+
+        public ElegivelViewModel AtualizarFotoElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId, byte[] foto, string fotoFileName)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
+            IsNotNull(votacao, "Votação", 'a');
+            var elegivel = votacao.BuscarElegivelPeloId(elegivelId);
+            IsNotNull(elegivel, "Associado", 'o');
+
+            string relativePath = $@"{PATH_FOTOS}{votacaoId.ToString()}";
+            string absolutePath = @FileSystemHelpers.GetAbsolutePath(relativePath);
+            string tempPath = FileSystemHelpers.GetAbsolutePath($@"{relativePath}/temp");
+
+            if (!Directory.Exists(absolutePath))
+                Directory.CreateDirectory(absolutePath);
+
+            if (!Directory.Exists(tempPath))
+                Directory.CreateDirectory(tempPath);
+
+            // Salva a imagem original
+            string originalFileName = @FileSystemHelpers.GetAbsolutePath(FileSystemHelpers.GetRelativeFileName(tempPath, fotoFileName));
+            File.WriteAllBytes(originalFileName, foto);
+
+            // Converte para JPEG, com 80% da qualidade
+            string destinationFileName = FileSystemHelpers.GetRelativeFileName(relativePath, Path.ChangeExtension(fotoFileName, ".jpeg"));
+            ImageHelpers.SalvarImagemJPEG(originalFileName, @FileSystemHelpers.GetAbsolutePath(destinationFileName), 80);
+
+            // Exclui o arquivo orginal
+            File.Delete(originalFileName);
+
+            if (!string.IsNullOrWhiteSpace(elegivel.Foto))
+            {
+                var fotoAnterior = FileSystemHelpers.GetAbsolutePath(elegivel.Foto);
+                if (File.Exists(fotoAnterior)) File.Delete(FileSystemHelpers.GetAbsolutePath(elegivel.Foto));
+            }
+            elegivel.Foto = destinationFileName;
+            base.Atualizar(ciclo);
+            return _mapper.Map<ElegivelViewModel>(elegivel);
+        }
+
+        public ImportacaoViewModel ImportarAssociados(Guid cicloId, Guid votacaoId, byte[] conteudoArquivo, string arquivo, string cpfUsuario)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
+            IsNotNull(votacao, "Votação", 'a');
+
+            string relativePath = $@"{PATH_IMPORTACOES}{votacaoId.ToString()}\Associados";
+            string absolutePath = @FileSystemHelpers.GetAbsolutePath(relativePath);
+
+            if (!Directory.Exists(absolutePath))
+                Directory.CreateDirectory(absolutePath);
+
+            string fullFileName = @FileSystemHelpers.GetAbsolutePath(FileSystemHelpers.GetRelativeFileName(absolutePath, arquivo));
+            File.WriteAllBytes(fullFileName, conteudoArquivo);
+
+            var importacao = new Importacao(votacao, relativePath, cpfUsuario);
+            votacao.AdicionarImportacao(importacao);
+            base.Atualizar(ciclo);
+            return _mapper.Map<ImportacaoViewModel>(importacao);
         }
 
     }

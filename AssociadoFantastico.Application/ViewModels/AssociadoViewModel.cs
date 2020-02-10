@@ -24,6 +24,7 @@ namespace AssociadoFantastico.Application.ViewModels
 
         [Required(ErrorMessage = "O grupo do associado precisa ser informado.")]
         public Guid GrupoId { get; set; }
+        public string GrupoNome { get; set; }
         [Range(0, 100000, ErrorMessage = "A quantidade de aplausogramas não pode ser menor que {1}.")]
         public int Aplausogramas { get; set; }
         [Required(ErrorMessage = "O centro de custo do associado precisa ser informado.")]

@@ -55,6 +55,8 @@ namespace AssociadoFantastico.WebApi.AutoMapper
                             : TipoVotacao.VotacaoAssociadoSuperFantastico)
                         );
                 cfg.CreateMap<Voto, VotoViewModel>();
+                cfg.CreateMap<Importacao, ImportacaoViewModel>()
+                    .ForMember(dest => dest.Horario, src => src.MapFrom(i => i.DataCadastro));
             });
             return config.CreateMapper();
         }
