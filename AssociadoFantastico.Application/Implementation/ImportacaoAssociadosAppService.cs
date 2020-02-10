@@ -27,7 +27,7 @@ namespace AssociadoFantastico.Application.Implementation
         protected override void ProcessarDados(Importacao importacao, DataTable dataTable)
         {
             var associados = AdicionarAssociados(dataTable);
-            var inconsistencias = RetornarInconsistenciasCPFsDuplicados(associados).ToList();
+            var inconsistencias = RetornarInconsistenciasDadosDuplicados(associados.Select(a => a.Cpf), ColunasArquivo.CPF).ToList();
 
             if (!FinalizarImportacaoComErro(importacao, inconsistencias))
             {
@@ -95,10 +95,5 @@ namespace AssociadoFantastico.Application.Implementation
             return associados;
         }
 
-        private IEnumerable<Inconsistencia> RetornarInconsistenciasCPFsDuplicados(List<AssociadoViewModel> associados) =>
-            associados.Select(e => e.Cpf).Distinct()
-                .ToDictionary(cpf => cpf, cpf => associados.Count(e => e.Cpf == cpf))
-                .Where(dic => dic.Value > 1)
-                .Select(dic => new Inconsistencia(ColunasArquivo.CPF, 0, $"Há {dic.Value} linhas no arquivo com o CPF {dic.Key}."));
     }
 }

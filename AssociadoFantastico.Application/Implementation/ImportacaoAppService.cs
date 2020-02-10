@@ -50,9 +50,7 @@ namespace AssociadoFantastico.Application.Implementation
                 var inconsistencias = ValidarFormatoDataTable(dataTable);
 
                 if (!FinalizarImportacaoComErro(importacao, inconsistencias))
-                {
                     ProcessarDados(importacao, dataTable);
-                }
 
             }
             catch (Exception ex)
@@ -75,7 +73,6 @@ namespace AssociadoFantastico.Application.Implementation
                 });
         }
 
-        
 
         protected virtual List<Inconsistencia> ValidarFormatoDataTable(DataTable dataTable)
         {
@@ -119,6 +116,11 @@ namespace AssociadoFantastico.Application.Implementation
                     yield return column.ColumnName;
         }
 
+        protected IEnumerable<Inconsistencia> RetornarInconsistenciasDadosDuplicados(IEnumerable<object> dados, string coluna) =>
+            dados.Distinct().ToDictionary(dado => dado, dado => dados.Count(d => d.Equals(dado)))
+                .Where(dic => dic.Value > 1)
+                .Select(dic => new Inconsistencia(coluna, 0, $"Há {dic.Value} linhas no arquivo com {coluna} {dic.Key}."));
+
         protected bool FinalizarImportacaoComErro(Importacao importacao, IEnumerable<Inconsistencia> inconsistencias)
         {
             if (inconsistencias.Any())
@@ -138,7 +140,6 @@ namespace AssociadoFantastico.Application.Implementation
         }
 
         
-
         protected virtual T ObtemValorFormatoCorreto<T>(DataRow dr, string columnName, DataColumnValidator validator)
         {
             if (!dr.Table.Columns.Contains(columnName)) return default(T);
