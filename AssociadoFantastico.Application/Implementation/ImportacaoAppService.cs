@@ -28,7 +28,7 @@ namespace AssociadoFantastico.Application.Implementation
             IExcelService excelService,
             IMapper mapper,
             IImportacaoServiceConfiguration importacaoConfiguration,
-            IProgressoImportacaoEvent progressoEvent) : base(unitOfWork, unitOfWork.ImportacaoRepository, mapper)
+            IProgressoImportacaoEvent progressoEvent) : base(unitOfWork, unitOfWork.ImportacaoRepository, mapper, "Importação", 'a')
         {
             _excelService = excelService;
             _dataColumnValidators = importacaoConfiguration.Validators;
@@ -154,7 +154,7 @@ namespace AssociadoFantastico.Application.Implementation
                 LinhasProcessadas = linhasProcessadas,
                 TotalEtapas = 1,
                 TotalLinhas = totalLinhas,
-                EmailUsuario = cpfUsuario
+                CPFUsuario = cpfUsuario
             });
         }
 

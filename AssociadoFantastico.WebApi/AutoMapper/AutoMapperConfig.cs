@@ -1,4 +1,5 @@
-﻿using AssociadoFantastico.Application.ViewModels;
+﻿using AssociadoFantastico.Application.EventsArgs;
+using AssociadoFantastico.Application.ViewModels;
 using AssociadoFantastico.Domain.Entities;
 using AutoMapper;
 using System.Linq;
@@ -24,27 +25,24 @@ namespace AssociadoFantastico.WebApi.AutoMapper
                 cfg.CreateMap<Periodo, PeriodoViewModel>().ReverseMap();
                 cfg.CreateMap<Usuario, UsuarioViewModel>();
                 cfg.CreateMap<Associado, AssociadoViewModel>()
-                    .ConstructUsing(src => new AssociadoViewModel(
-                        src.Usuario.Cpf,
-                        src.Usuario.Matricula,
-                        src.Usuario.Nome,
-                        src.Cargo,
-                        src.Area,
-                        src.CentroCusto,
-                        src.Aplausogramas,
-                        src.Usuario.Perfil,
-                        src.GrupoId));
+                    .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Usuario.Cpf))
+                    .ForMember(dest => dest.Matricula, opt => opt.MapFrom(src => src.Usuario.Matricula))
+                    .ForMember(dest => dest.Nome, opt => opt.MapFrom(src => src.Usuario.Nome))
+                    .ForMember(dest => dest.EmpresaId, opt => opt.MapFrom(src => src.Usuario.EmpresaId))
+                    .ForMember(dest => dest.Perfil, opt => opt.MapFrom(src => src.Usuario.Perfil));
                 cfg.CreateMap<Elegivel, ElegivelViewModel>()
-                    .ConstructUsing(src => new ElegivelViewModel(
-                        src.Associado.Usuario.Cpf,
-                        src.Associado.Usuario.Matricula,
-                        src.Associado.Usuario.Nome,
-                        src.Associado.Cargo,
-                        src.Associado.Area,
-                        src.Associado.CentroCusto,
-                        src.Associado.Aplausogramas,
-                        src.Associado.Usuario.Perfil,
-                        src.Associado.GrupoId));
+                    .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Associado.Usuario.Cpf))
+                    .ForMember(dest => dest.Matricula, opt => opt.MapFrom(src => src.Associado.Usuario.Matricula))
+                    .ForMember(dest => dest.Nome, opt => opt.MapFrom(src => src.Associado.Usuario.Nome))
+                    .ForMember(dest => dest.Cargo, opt => opt.MapFrom(src => src.Associado.Cargo))
+                    .ForMember(dest => dest.Area, opt => opt.MapFrom(src => src.Associado.Area))
+                    .ForMember(dest => dest.CentroCusto, opt => opt.MapFrom(src => src.Associado.CentroCusto))
+                    .ForMember(dest => dest.EmpresaId, opt => opt.MapFrom(src => src.Associado.Usuario.EmpresaId))
+                    .ForMember(dest => dest.GrupoId, opt => opt.MapFrom(src => src.Associado.GrupoId))
+                    .ForMember(dest => dest.GrupoNome, opt => opt.MapFrom(src => src.Associado.Grupo.Nome))
+                    .ForMember(dest => dest.Perfil, opt => opt.MapFrom(src => src.Associado.Usuario.Perfil));
+                cfg.CreateMap<FinalizacaoImportacaoStatusEventArgs, FinalizacaoImportacaoStatusViewModel>()
+                    .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString("g")));
                 cfg.CreateMap<Grupo, GrupoViewModel>().ReverseMap().ConstructUsing(dest => new Grupo(dest.Nome));
                 cfg.CreateMap<Votacao, VotacaoViewModel>()
                     .ForMember(

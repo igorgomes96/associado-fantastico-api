@@ -26,7 +26,7 @@ namespace AssociadoFantastico.Application.Implementation
             ICicloRepository repositoryBase,
             IMapper mapper,
             DimensionamentoPadraoAssociadoFantastico dimensionamentoPadraoAssociadoFantastico,
-            DimensionamentoPadraoAssociadoSuperFantastico dimensionamentoPadraoAssociadoSuperFantastico) : base(unitOfWork, repositoryBase, mapper)
+            DimensionamentoPadraoAssociadoSuperFantastico dimensionamentoPadraoAssociadoSuperFantastico) : base(unitOfWork, repositoryBase, mapper, "Ciclo", 'o')
         {
             _dimensionamentoPadraoAssociadoSuperFantastico = dimensionamentoPadraoAssociadoSuperFantastico;
             _dimensionamentoPadraoAssociadoFantastico = dimensionamentoPadraoAssociadoFantastico;
@@ -108,16 +108,12 @@ namespace AssociadoFantastico.Application.Implementation
             base.Atualizar(ciclo);
         }
 
-        public IEnumerable<ElegivelViewModel> BuscarElegiveis(Guid cicloId, Guid votacaoId, Guid? grupoId = null)
-        {
-            var ciclo = BuscarEntidade(cicloId);
-            var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
-            IsNotNull(votacao, "Votação", 'a');
-            var elegiveis = votacao.Elegiveis.AsQueryable();
-            if (grupoId.HasValue)
-                elegiveis = elegiveis.Where(e => e.Associado.GrupoId == grupoId.Value);
-            return elegiveis.ProjectTo<ElegivelViewModel>(_mapper.ConfigurationProvider);
-        }
+        private IQueryable<Elegivel> BuscarElegiveisEntidades(Guid cicloId, Guid votacaoId, Guid? grupoId = null) =>
+            grupoId.HasValue ? (_repositoryBase as ICicloRepository).BuscarElegiveis(cicloId, votacaoId, grupoId.Value) :
+                (_repositoryBase as ICicloRepository).BuscarElegiveis(cicloId, votacaoId);
+
+        public IEnumerable<ElegivelViewModel> BuscarElegiveis(Guid cicloId, Guid votacaoId, Guid? grupoId = null) =>
+            BuscarElegiveisEntidades(cicloId, votacaoId, grupoId).ProjectTo<ElegivelViewModel>(_mapper.ConfigurationProvider);
 
         public ElegivelViewModel AdicionarElegivel(Guid cicloId, Guid votacaoId, Guid associadoId)
         {
@@ -190,20 +186,12 @@ namespace AssociadoFantastico.Application.Implementation
             return grupo;
         }
 
-        private IQueryable<Associado> BuscarAssociadosEntidades(Guid cicloId, Guid? grupoId = null)
-        {
-            var ciclo = BuscarEntidade(cicloId);
-            var associados = ciclo.Associados.AsQueryable();
-            if (grupoId.HasValue)
-                associados = associados.Where(a => a.GrupoId == grupoId.Value);
-            return associados;
-        }
+        public IQueryable<Associado> BuscarAssociadosEntidades(Guid cicloId, Guid? grupoId = null) =>
+            grupoId.HasValue ? (_repositoryBase as ICicloRepository).BuscarAssociados(cicloId, grupoId.Value)
+                : (_repositoryBase as ICicloRepository).BuscarAssociados(cicloId);
 
-        public IEnumerable<AssociadoViewModel> BuscarAssociados(Guid cicloId, Guid? grupoId = null)
-        {
-            return BuscarAssociadosEntidades(cicloId, grupoId)
-                .ProjectTo<AssociadoViewModel>(_mapper.ConfigurationProvider);
-        }
+        public IEnumerable<AssociadoViewModel> BuscarAssociados(Guid cicloId, Guid? grupoId = null) =>
+            BuscarAssociadosEntidades(cicloId, grupoId).ProjectTo<AssociadoViewModel>(_mapper.ConfigurationProvider);
 
         public IEnumerable<AssociadoViewModel> BuscarAssociadosNaoElegiveis(Guid cicloId, Guid? grupoId = null)
         {
@@ -228,7 +216,7 @@ namespace AssociadoFantastico.Application.Implementation
                     associado.Area,
                     empresa);
 
-            var grupo = ciclo.BuscarGrupoPeloId(associado.GrupoId);
+            var grupo = ciclo.BuscarGrupoPeloId(associado.GrupoId.Value);
             IsNotNull(grupo, "Grupo", 'o');
 
             ciclo.AdicionarAssociado(new Associado(usuario, grupo, associado.Aplausogramas, associado.CentroCusto));
@@ -250,7 +238,7 @@ namespace AssociadoFantastico.Application.Implementation
             var associadoAtualizado = ciclo.BuscarAssociadoPeloId(associado.Id);
             IsNotNull(associadoAtualizado, "Associado", 'o');
 
-            var grupo = ciclo.BuscarGrupoPeloId(associado.GrupoId);
+            var grupo = ciclo.BuscarGrupoPeloId(associado.GrupoId.Value);
             IsNotNull(grupo, "Grupo", 'o');
 
             var empresa = _unitOfWork.EmpresaRepository.BuscarPeloId(associado.EmpresaId);
@@ -331,7 +319,7 @@ namespace AssociadoFantastico.Application.Implementation
             var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
             IsNotNull(votacao, "Votação", 'a');
 
-            string relativePath = $@"{PATH_IMPORTACOES}{votacaoId.ToString()}\Associados";
+            string relativePath = $@"{PATH_IMPORTACOES}{votacaoId.ToString()}/Associados";
             string absolutePath = @FileSystemHelpers.GetAbsolutePath(relativePath);
 
             if (!Directory.Exists(absolutePath))
@@ -340,11 +328,20 @@ namespace AssociadoFantastico.Application.Implementation
             string fullFileName = @FileSystemHelpers.GetAbsolutePath(FileSystemHelpers.GetRelativeFileName(absolutePath, arquivo));
             File.WriteAllBytes(fullFileName, conteudoArquivo);
 
-            var importacao = new Importacao(votacao, relativePath, cpfUsuario);
+            var importacao = new Importacao(votacao, Path.Combine(relativePath, arquivo), cpfUsuario);
             votacao.AdicionarImportacao(importacao);
             base.Atualizar(ciclo);
             return _mapper.Map<ImportacaoViewModel>(importacao);
         }
 
+        public ImportacaoViewModel RetornarUltimaImportacao(Guid cicloId, Guid votacaoId)
+        {
+            var ciclo = BuscarEntidade(cicloId);
+            var votacao = ciclo.Votacoes.SingleOrDefault(v => v.Id == votacaoId);
+            IsNotNull(votacao, "Votação", 'a');
+
+            var importacao = votacao.BuscarUltimaImportacao();
+            return importacao == null ? null : _mapper.Map<ImportacaoViewModel>(importacao);
+        }
     }
 }

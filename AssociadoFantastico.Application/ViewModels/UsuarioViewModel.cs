@@ -6,16 +6,16 @@ namespace AssociadoFantastico.Application.ViewModels
 {
     public class UsuarioViewModel: EntityViewModel
     {
-        public UsuarioViewModel() { }
-        public UsuarioViewModel(string cpf, string matricula, string nome, string cargo, string area, EPerfilUsuario perfil)
-        {
-            Cpf = cpf;
-            Matricula = matricula;
-            Nome = nome;
-            Cargo = cargo;
-            Area = area;
-            Perfil = perfil;
-        }
+        //public UsuarioViewModel() { }
+        //public UsuarioViewModel(string cpf, string matricula, string nome, string cargo, string area, EPerfilUsuario perfil)
+        //{
+        //    Cpf = cpf;
+        //    Matricula = matricula;
+        //    Nome = nome;
+        //    Cargo = cargo;
+        //    Area = area;
+        //    Perfil = perfil;
+        //}
 
         [Required(ErrorMessage = "O CPF do associado deve ser informado.")]
         [StringLength(11, ErrorMessage = "O CPF deve conter {1} caracteres.", MinimumLength = 11)]

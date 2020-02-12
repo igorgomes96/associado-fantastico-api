@@ -30,6 +30,7 @@ namespace AssociadoFantastico.Application.Interfaces
         ElegivelViewModel AtualizarFotoElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId, byte[] foto, string fotoFileName);
         Stream BuscarFotoElegivel(Guid cicloId, Guid votacaoId, Guid elegivelId);
         ImportacaoViewModel ImportarAssociados(Guid cicloId, Guid votacaoId, byte[] conteudoArquivo, string arquivo, string cpfUsuario);
+        ImportacaoViewModel RetornarUltimaImportacao(Guid cicloId, Guid votacaoId);
 
     }
 }

@@ -18,11 +18,13 @@ namespace AssociadoFantastico.Application.Implementation
         protected readonly IUnitOfWork _unitOfWork;
         protected readonly IMapper _mapper;
 
-        public AppServiceBase(IUnitOfWork unitOfWork, IRepositoryBase<TEntity> repositoryBase, IMapper mapper)
+        public AppServiceBase(IUnitOfWork unitOfWork, IRepositoryBase<TEntity> repositoryBase, IMapper mapper, string resourceName, char resourcerGender)
         {
             _repositoryBase = repositoryBase;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            ResourceName = resourceName;
+            ResourceGender = resourcerGender;
 
         }
 

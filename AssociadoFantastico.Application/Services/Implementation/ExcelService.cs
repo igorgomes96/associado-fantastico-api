@@ -1,4 +1,5 @@
-﻿using AssociadoFantastico.Domain.Exceptions;
+﻿using AssociadoFantastico.Application.Services.Interfaces;
+using AssociadoFantastico.Domain.Exceptions;
 using ClosedXML.Excel;
 using System;
 using System.Data;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace AssociadoFantastico.Application.Services.Implementation
 {
-    public class ExcelService
+    public class ExcelService: IExcelService
     {
         public ExcelService() { }
         public DataTable LerTabela(string fileName, int colunaInicial, int colunaFinal, int linhaInicial = 1, bool temCabecalho = true)

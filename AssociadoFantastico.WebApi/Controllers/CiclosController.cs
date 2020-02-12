@@ -100,6 +100,10 @@ namespace AssociadoFantastico.WebApi.Controllers
             }
             return (_appService as ICicloAppService).ImportarAssociados(id, votacaoId, arquivo, fileName, CPFUsuario);
         }
+
+        [HttpGet("{id}/votacoes/{votacaoId}/ultimaimportacaoassociados")]
+        public ImportacaoViewModel GetUltimaImportacaoAssociados(Guid id, Guid votacaoId) =>
+            (_appService as ICicloAppService).RetornarUltimaImportacao(id, votacaoId);
         #endregion
 
         #region Grupos

@@ -24,6 +24,7 @@ namespace AssociadoFantastico.Domain.Entities
             VotacaoId = votacao.Id;
             Status = StatusImportacao.Aguardando;
             CPFUsuarioImportacao = cpfUsuarioImportacao;
+            DataCadastro = DateTime.Now;
             Arquivo = arquivo;
         }
 

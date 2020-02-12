@@ -9,7 +9,7 @@ namespace AssociadoFantastico.Application.Implementation
 {
     public class EmpresaAppService : AppServiceBase<Empresa, EmpresaViewModel>, IEmpresaAppService
     {
-        public EmpresaAppService(IUnitOfWork unitOfWork, IEmpresaRepository repositoryBase, IMapper mapper) : base(unitOfWork, repositoryBase, mapper)
+        public EmpresaAppService(IUnitOfWork unitOfWork, IEmpresaRepository repositoryBase, IMapper mapper) : base(unitOfWork, repositoryBase, mapper, "Empresa", 'a')
         {
         }
     }

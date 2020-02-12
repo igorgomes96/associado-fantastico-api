@@ -31,8 +31,7 @@ namespace AssociadoFantastico.Infra.Data.EntityConfig
             builder.HasOne(a => a.Ciclo)
                 .WithMany(c => c.Associados)
                 .HasForeignKey(a => a.CicloId)
-                .IsRequired()
-                .Metadata.PrincipalToDependent.SetPropertyAccessMode(PropertyAccessMode.Field);
+                .IsRequired();
 
             builder.HasOne(a => a.Grupo)
                 .WithMany(g => g.Associados)

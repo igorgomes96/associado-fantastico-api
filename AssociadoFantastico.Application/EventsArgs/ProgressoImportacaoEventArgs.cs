@@ -9,6 +9,6 @@ namespace AssociadoFantastico.Application.EventsArgs
         public int TotalEtapas { get; set; }
         public int EtapaAtual { get; set; }
         public decimal Progresso { get; set; }
-        public string EmailUsuario { get; set; }
+        public string CPFUsuario { get; set; }
     }
 }

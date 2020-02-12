@@ -9,7 +9,7 @@ namespace AssociadoFantastico.Application.Implementation
 {
     public class UsuarioAppService : AppServiceBase<Usuario, UsuarioViewModel>, IUsuarioAppService
     {
-        public UsuarioAppService(IUnitOfWork unitOfWork, IUsuarioRepository repositoryBase, IMapper mapper) : base(unitOfWork, repositoryBase, mapper)
+        public UsuarioAppService(IUnitOfWork unitOfWork, IUsuarioRepository repositoryBase, IMapper mapper) : base(unitOfWork, repositoryBase, mapper, "Usuário", 'o')
         {
         }
 

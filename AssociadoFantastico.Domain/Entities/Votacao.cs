@@ -166,5 +166,7 @@ namespace AssociadoFantastico.Domain.Entities
             return voto;
         }
 
+        public Importacao BuscarUltimaImportacao() => Importacoes.OrderBy(i => i.DataCadastro).LastOrDefault();
+
     }
 }
